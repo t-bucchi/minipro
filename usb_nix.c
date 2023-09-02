@@ -215,16 +215,23 @@ static int payload_transfer(void *handle, uint8_t direction,
 	return EXIT_SUCCESS;
 }
 
-int write_payload(void *handle, uint8_t *buffer, size_t length)
+int write_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 {
 	uint32_t ep2_length;
 	uint32_t ep3_length;
+	int status;
 	int bytes_transferred;
 
 	// If the payload length is exactly 64 bytes send it over the endpoint2 only
-	if (length == 64)
-		return msg_transfer(handle, buffer, length, LIBUSB_ENDPOINT_OUT,
+	if (!limit || length <= limit) {
+		status = msg_transfer(handle, buffer, length, LIBUSB_ENDPOINT_OUT,
 				    0x02, &bytes_transferred, MP_USBTIMEOUT);
+		if (bytes_transferred == length)
+			return status;
+
+		fprintf(stderr, "%s: short write %d/%lu\n", __func__, bytes_transferred, length);
+		return EXIT_FAILURE;
+	}
 
 	// This  is from XgPro
 	uint32_t j = length % 128;
@@ -246,7 +253,7 @@ int write_payload(void *handle, uint8_t *buffer, size_t length)
 				buffer + ep2_length, ep3_length);
 }
 
-int read_payload(void *handle, uint8_t *buffer, size_t length)
+int read_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 {
 	/*
    * If the payload length is less than 64 bytes increase the buffer to 64
@@ -264,12 +271,12 @@ int read_payload(void *handle, uint8_t *buffer, size_t length)
 		return EXIT_SUCCESS;
 	}
 
-	// If the payload length is exactly 64 bytes read it over the endpoint2 only
-	if (length == 64)
+	// If the payload length < limit bytes read it over the endpoint2 only
+	if (length == 64 || !limit || length < limit)
 		return msg_transfer(handle, buffer, length, LIBUSB_ENDPOINT_IN,
 				    0x02, &bytes_transferred, MP_USBTIMEOUT);
 
-	// More than 64 bytes
+	// More than limit bytes
 	uint8_t *data = malloc(length);
 	if (!data) {
 		fprintf(stderr, "\nOut of memory\n");

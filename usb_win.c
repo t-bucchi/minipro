@@ -155,13 +155,13 @@ int msg_recv(void *handle, uint8_t *buffer, size_t size)
 }
 
 // Write payload asynchronously
-int write_payload(void *handle, uint8_t *buffer, size_t length)
+int write_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 {
 	uint32_t ep2_length;
 	uint32_t ep3_length;
 
 	// If the payload length is exactly 64 bytes send it over the endpoint2 only
-	if (length == 64)
+	if (!limit || length <= limit)
 		return usb_write(handle, buffer, length,
 				 USB_ENDPOINT_OUT | 0x02);
 
@@ -185,9 +185,9 @@ int write_payload(void *handle, uint8_t *buffer, size_t length)
 }
 
 // Read payload asynchronously
-int read_payload(void *handle, uint8_t *buffer, size_t length)
+int read_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 {
-	/*
+  /*
    * If the payload length is less than 64 bytes increase the buffer to 64
    * bytes and  read it over the endpoint2 only. Submitting a buffer less than
    * 64 bytes will cause an libusb overflow.
@@ -202,7 +202,7 @@ int read_payload(void *handle, uint8_t *buffer, size_t length)
 	}
 
 	// If the payload length is exactly 64 bytes read it over the endpoint2 only
-	if (length == 64)
+	if (length <= limit)
 		return usb_read(handle, buffer, length, USB_ENDPOINT_IN | 0x02);
 
 	// More than 64 bytes
