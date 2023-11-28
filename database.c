@@ -1229,6 +1229,9 @@ device_t *get_device_by_name(db_data_t *db_data)
 	if (db_data->version == MP_TL866CS)
 		db_data->version = MP_TL866A;
 
+	if (db_data->version == MP_T48)
+		db_data->version = MP_TL866IIPLUS;
+
 	// Initialize state machine structure
 	state_machine_d_t sm;
 	memset(&sm, 0, sizeof(sm));
@@ -1281,6 +1284,8 @@ int list_devices(db_data_t *db_data)
 	memset(device.name, 0, sizeof(device.name));
 	if (db_data->version == MP_TL866CS)
 		db_data->version = MP_TL866A;
+	if (db_data->version == MP_T48)
+		db_data->version = MP_TL866IIPLUS;
 	int flag = (db_data->chip_id || db_data->pin_count) ? 1 : 0;
 
 	// Initialize state machine structure

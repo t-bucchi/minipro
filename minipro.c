@@ -26,10 +26,12 @@
 #include "minipro.h"
 #include "tl866a.h"
 #include "tl866iiplus.h"
+#include "t48.h"
 #include "usb.h"
 
 #define TL866A_RESET	  0xFF
 #define TL866IIPLUS_RESET 0x3F
+#define T48_RESET 0x3F
 
 #define CRC32_POLYNOMIAL  0xEDB88320
 
@@ -96,6 +98,13 @@ static int minipro_get_system_info(minipro_handle_t *handle)
 		memcpy(handle->serial_number, msg + 15, 24);
 		hw = msg[39];
 		break;
+	case MP_T48:
+		handle->status = MP_STATUS_NORMAL; // TODO:
+		handle->model = "T48";
+		memcpy(handle->device_code, msg + 24, 8);
+		memcpy(handle->serial_number, msg + 32, 24);
+		hw = msg[60]; // TODO: confirm that it's HW
+		break;
 	default:
 		return EXIT_SUCCESS;
 	}
@@ -129,6 +138,7 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 	case MP_TL866A:
 	case MP_TL866CS:
 	case MP_TL866IIPLUS:
+	case MP_T48:
 		switch (handle->status) {
 		case MP_STATUS_NORMAL:
 		case MP_STATUS_BOOTLOADER:
@@ -208,6 +218,18 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		handle->minipro_set_pin_drivers = tl866iiplus_set_pin_drivers;
 		handle->minipro_set_voltages = tl866iiplus_set_voltages;
 		break;
+	case MP_T48:
+		handle->minipro_begin_transaction = t48_begin_transaction;
+		handle->minipro_end_transaction = t48_end_transaction;
+		handle->minipro_get_chip_id = t48_get_chip_id;
+		handle->minipro_spi_autodetect = t48_spi_autodetect;
+		handle->minipro_read_block = t48_read_block;
+		handle->minipro_write_block = t48_write_block;
+		handle->minipro_erase = t48_erase;
+		handle->minipro_read_fuses = t48_read_fuses;
+		handle->minipro_write_fuses = t48_write_fuses;
+		handle->minipro_get_ovc_status = t48_get_ovc_status;
+		break;
 	}
 	return handle;
 }
@@ -238,11 +260,26 @@ int minipro_reset(minipro_handle_t *handle)
 {
 	uint8_t msg[8];
 	uint8_t version = handle->version;
+	size_t size;
 
 	memset(msg, 0, sizeof(msg));
-	msg[0] = version == MP_TL866IIPLUS ? TL866IIPLUS_RESET : TL866A_RESET;
-	if (msg_send(handle->usb_handle, msg,
-		     version == MP_TL866IIPLUS ? 8 : 4)) {
+
+	switch (version) {
+	case MP_TL866A:
+	case MP_TL866CS:
+		msg[0] = TL866A_RESET;
+		size = 4;
+		break;
+	case MP_TL866IIPLUS:
+		msg[0] = TL866IIPLUS_RESET;
+		size = 8;
+		break;
+	case MP_T48:
+		msg[0] = T48_RESET;
+		size = 8;
+		break;
+	}
+	if (msg_send(handle->usb_handle, msg, size)) {
 		return EXIT_FAILURE;
 	}
 
@@ -280,6 +317,11 @@ void minipro_print_system_info(minipro_handle_t *handle)
 	case MP_TL866IIPLUS:
 		expected_firmware = TL866IIPLUS_FIRMWARE_VERSION;
 		expected_firmware_str = TL866IIPLUS_FIRMWARE_STRING;
+		break;
+	case MP_T48:
+		expected_firmware = T48_FIRMWARE_VERSION;
+		expected_firmware_str = T48_FIRMWARE_STRING;
+		break;
 	}
 
 	if (handle->status == MP_STATUS_BOOTLOADER) {
@@ -289,6 +331,10 @@ void minipro_print_system_info(minipro_handle_t *handle)
 
 	fprintf(stderr, "Found %s %s (%#03x)\n", handle->model,
 		handle->firmware_str, handle->firmware);
+
+	if (handle->version == MP_T48) {
+		fprintf(stderr, "Warning: T48 support is experimental!\n");
+	}
 
 	if (handle->firmware < expected_firmware) {
 		fprintf(stderr, "Warning: Firmware is out of date.\n");
@@ -303,8 +349,8 @@ void minipro_print_system_info(minipro_handle_t *handle)
 		fprintf(stderr, "  Found     %s (%#03x)\n",
 			handle->firmware_str, handle->firmware);
 	}
-	// fprintf(stderr, "Device code:%s\nSerial code:%s\n", handle->device_code,
-	// handle->serial_number);
+	fprintf(stderr, "Device code: %s\nSerial code: %s\n", handle->device_code,
+		handle->serial_number);
 }
 
 int minipro_begin_transaction(minipro_handle_t *handle)

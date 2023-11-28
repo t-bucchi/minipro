@@ -203,7 +203,7 @@ int get_programmer_version(uint8_t *version)
 
 void print_supported_programmers_and_exit()
 {
-	fprintf(stderr, "tl866a: TL866CS/A\ntl866ii: TL866II+\n");
+	fprintf(stderr, "tl866a: TL866CS/A\ntl866ii: TL866II+\nt48: T48\n");
 	exit(EXIT_SUCCESS);
 }
 
@@ -222,6 +222,9 @@ void print_connected_programmer_and_exit()
 			break;
 		case MP_TL866IIPLUS:
 			fprintf(stderr, "tl866ii: TL866II+\n");
+			break;
+		case MP_T48:
+			fprintf(stderr, "t48: T48\n");
 			break;
 		default:
 			fprintf(stderr, "[Unknown programmer version]\n");

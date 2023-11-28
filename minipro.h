@@ -24,6 +24,7 @@
 #define MP_TL866A			   1
 #define MP_TL866CS			   2
 #define MP_TL866IIPLUS			   5
+#define MP_T48				   7
 #define MP_STATUS_NORMAL		   1
 #define MP_STATUS_BOOTLOADER		   2
 
