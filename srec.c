@@ -54,7 +54,7 @@ typedef struct {
 	uint8_t data[255];
 } record_t;
 
-// Convert an ascii hex character
+/* Convert an ascii hex character */
 static uint8_t hex(const char hex)
 {
 	if (hex >= '0' && hex <= '9')
@@ -67,19 +67,19 @@ static uint8_t hex(const char hex)
 		return 0xff;
 }
 
-// Parse a record
+/* Parse a record */
 static record_t parse_record(uint8_t *record)
 {
 	record_t rec;
 	size_t i;
 	uint8_t byte_count;
-	// Check for start code
+	/* Check for start code */
 	if (record[0] != 'S') {
 		rec.result = BAD_FORMAT;
 		return rec;
 	}
 
-	// Check for valid characters
+	/* Check for valid characters */
 	for (i = 1; record[i] != '\r' && record[i] != '\n'; i++) {
 		if (hex(record[i]) > 0x0F) {
 			rec.result = BAD_FORMAT;
@@ -87,20 +87,20 @@ static record_t parse_record(uint8_t *record)
 		}
 	}
 
-	// Get the record type
+	/* Get the record type */
 	rec.type = (hex(record[1]));
 	if (rec.type > S9) {
 		rec.result = BAD_RECORD;
 		return rec;
 	}
-	// Get the count field
+	/* Get the count field */
 	byte_count = (hex(record[2]) << 4) | hex(record[3]);
 	if (i < byte_count * 2 + MIN_RECORD_SIZE) {
 		rec.result = BAD_COUNT;
 		return rec;
 	}
 
-	// Get the record address
+	/* Get the record address */
 	switch (rec.type) {
 	case S0:
 		rec.address = 0;
@@ -109,7 +109,7 @@ static record_t parse_record(uint8_t *record)
 	case S1:
 	case S5:
 	case S9:
-		// Four hex digits address
+		/* Four hex digits address */
 		rec.address = (hex(record[4]) << 12) | (hex(record[5]) << 8) |
 			      (hex(record[6]) << 4) | hex(record[7]);
 		rec.count = byte_count - 3;
@@ -117,7 +117,7 @@ static record_t parse_record(uint8_t *record)
 	case S2:
 	case S6:
 	case S8:
-		// Six hex digits address
+		/* Six hex digits address */
 		rec.address = (hex(record[4]) << 20) | (hex(record[5]) << 16) |
 			      (hex(record[6]) << 12) | (hex(record[7]) << 8) |
 			      (hex(record[8]) << 4) | hex(record[9]);
@@ -125,20 +125,20 @@ static record_t parse_record(uint8_t *record)
 		break;
 	case S3:
 	case S7:
-		// Eight hex digits address
+		/* Eight hex digits address */
 		rec.address = (hex(record[4]) << 28) | (hex(record[5]) << 24) |
 			      (hex(record[6]) << 20) | (hex(record[7]) << 16) |
 			      (hex(record[8]) << 12) | (hex(record[9]) << 8) |
 			      (hex(record[10]) << 4) | hex(record[11]);
 		rec.count = byte_count - 5;
 		break;
-		// S4 record ignored
+		/* S4 record ignored */
 	default:
 		rec.result = NO_ERROR;
 		return rec;
 	}
 
-	// Calculate checksum and copy data bytes
+	/* Calculate checksum and copy data bytes */
 	uint8_t checksum_c = byte_count + (rec.address >> 24) +
 			     (rec.address >> 16) + (rec.address >> 8) +
 			     (rec.address & 0xff);
@@ -164,7 +164,7 @@ static record_t parse_record(uint8_t *record)
 	return rec;
 }
 
-// Write a record
+/* Write a record */
 static int write_record(FILE *file, record_t *record)
 {
 	uint8_t *pData = record->data;
@@ -199,7 +199,7 @@ static int write_record(FILE *file, record_t *record)
 	return EXIT_SUCCESS;
 }
 
-// Read a Motorola S-Record file
+/* Read a Motorola S-Record file */
 int read_srec_file(uint8_t *buffer, uint8_t *data, size_t *size)
 {
 	uint32_t line = 0;
@@ -208,7 +208,7 @@ int read_srec_file(uint8_t *buffer, uint8_t *data, size_t *size)
 	size_t chip_size = *size;
 
 	while (buffer) {
-		// Skip empty lines
+		/* Skip empty lines */
 		line++;
 		if (*buffer == '\r' || *buffer == '\n') {
 			buffer++;
@@ -239,10 +239,10 @@ int read_srec_file(uint8_t *buffer, uint8_t *data, size_t *size)
 			case S1:
 			case S2:
 			case S3:
-				// If file data size is bigger than chip size
-				// update the new size
+				/* If file data size is bigger than chip size
+				 * update the new size */
 				if (chip_size >= rec.address + rec.count)
-					// copy record data
+					/* copy record data */
 					memcpy(&(data[rec.address]), rec.data,
 					       rec.count);
 				else
@@ -272,7 +272,7 @@ int read_srec_file(uint8_t *buffer, uint8_t *data, size_t *size)
 	return SREC_FORMAT;
 }
 
-// Write an S-Record file
+/* Write an S-Record file */
 int write_srec_file(FILE *file, uint8_t *data, uint32_t address, size_t size,
 		    int write_rec_count)
 {
@@ -306,7 +306,7 @@ int write_srec_file(FILE *file, uint8_t *data, uint32_t address, size_t size,
 		address += ROW_SIZE;
 		line++;
 	}
-	// Write record count
+	/* Write record count */
 	if (write_rec_count) {
 		rec.type = (line < 65536 ? S5 : S6);
 		rec.count = 0x00;

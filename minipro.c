@@ -56,7 +56,7 @@ uint32_t load_int(uint8_t *buffer, size_t size, uint8_t endianness)
 	return result;
 }
 
-// Simple crc32
+/* Simple crc32 */
 uint32_t crc32(uint8_t *data, size_t size, uint32_t initial)
 {
 	uint32_t i, j, crc;
@@ -99,11 +99,11 @@ static int minipro_get_system_info(minipro_handle_t *handle)
 		hw = msg[39];
 		break;
 	case MP_T48:
-		handle->status = MP_STATUS_NORMAL; // TODO:
+		handle->status = MP_STATUS_NORMAL; /* TODO: */
 		handle->model = "T48";
 		memcpy(handle->device_code, msg + 24, 8);
 		memcpy(handle->serial_number, msg + 32, 24);
-		hw = msg[60]; // TODO: confirm that it's HW
+		hw = msg[60]; /* TODO: confirm that it's HW */
 		break;
 	default:
 		return EXIT_SUCCESS;
@@ -124,14 +124,14 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		return NULL;
 	}
 
-	// get a usb handle
+	/* get a usb handle */
 	handle->usb_handle = usb_open(verbose);
 	if (!handle->usb_handle) {
 		free(handle);
 		return NULL;
 	}
 
-	// get the system info
+	/* get the system info */
 	if (minipro_get_system_info(handle))
 		return NULL;
 	switch (handle->version) {
@@ -158,7 +158,7 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		return NULL;
 	}
 
-	// Initialize function pointers
+	/* Initialize function pointers */
 	switch (handle->version) {
 	case MP_TL866A:
 	case MP_TL866CS:
@@ -255,7 +255,7 @@ void minipro_close(minipro_handle_t *handle)
 		free(handle);
 }
 
-// Reset TL866 device
+/* Reset TL866 device */
 int minipro_reset(minipro_handle_t *handle)
 {
 	uint8_t msg[8];
@@ -283,7 +283,7 @@ int minipro_reset(minipro_handle_t *handle)
 		return EXIT_FAILURE;
 	}
 
-	uint32_t wait = 200; // 20 Sec wait to disappear
+	uint32_t wait = 200; /* 20 Sec wait to disappear */
 	do {
 		wait--;
 		usleep(100000);
@@ -292,7 +292,7 @@ int minipro_reset(minipro_handle_t *handle)
 		return EXIT_FAILURE;
 	}
 
-	wait = 200; // 20 Sec wait to appear
+	wait = 200; /* 20 Sec wait to appear */
 	do {
 		wait--;
 		usleep(100000);
@@ -357,7 +357,7 @@ int minipro_begin_transaction(minipro_handle_t *handle)
 {
 	assert(handle != NULL);
 
-	// pack voltages
+	/* pack voltages */
 	voltages_t *voltages = &handle->device->voltages;
 	voltages->raw_voltages = (voltages->raw_voltages & 0xffff000f) |
 				 (voltages->vdd << 12) | (voltages->vcc << 8) |
@@ -490,7 +490,7 @@ int minipro_read_fuses(minipro_handle_t *handle, uint8_t type, size_t length,
 {
 	assert(handle != NULL);
 
-	// If chip lock bit is write only don't read it.
+	/* If chip lock bit is write only don't read it. */
 	if (type == MP_FUSE_LOCK && handle->device->flags.lock_bit_write_only)
 		return EXIT_SUCCESS;
 
@@ -560,7 +560,7 @@ int minipro_read_calibration(minipro_handle_t *handle, uint8_t *buffer,
 	return EXIT_FAILURE;
 }
 
-// Unlocking the TSOP48 adapter.
+/* Unlocking the TSOP48 adapter. */
 int minipro_unlock_tsop48(minipro_handle_t *handle, uint8_t *status)
 {
 	assert(handle != NULL);
@@ -572,7 +572,7 @@ int minipro_unlock_tsop48(minipro_handle_t *handle, uint8_t *status)
 	return EXIT_FAILURE;
 }
 
-// Minipro hardware check
+/* Minipro hardware check */
 int minipro_hardware_check(minipro_handle_t *handle)
 {
 	assert(handle != NULL);
@@ -598,7 +598,7 @@ int minipro_firmware_update(minipro_handle_t *handle, const char *firmware)
 	return EXIT_FAILURE;
 }
 
-// Pin contact test
+/* Pin contact test */
 int minipro_pin_test(minipro_handle_t *handle)
 {
 	assert(handle != NULL);

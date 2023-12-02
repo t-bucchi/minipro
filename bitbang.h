@@ -24,7 +24,7 @@ enum pwr_pin_type {
 	VPP_PIN
 };
 
-// Bit-banging functions
+/* Bit-banging functions */
 int bb_begin_transaction(minipro_handle_t *);
 int bb_end_transaction(minipro_handle_t *);
 int bb_read_block(minipro_handle_t *, uint8_t, uint32_t, uint8_t *, size_t);
@@ -40,7 +40,7 @@ int bb_erase(minipro_handle_t *);
 int bb_write_jedec_row(minipro_handle_t *, uint8_t *, uint8_t, uint8_t, size_t);
 int bb_read_jedec_row(minipro_handle_t *, uint8_t *, uint8_t, uint8_t, size_t);
 
-// Helper functions
+/* Helper functions */
 void set_io_pins(uint8_t *, uint8_t *, uint8_t, uint8_t);
 void set_pwr_pins(pin_driver_t *, uint8_t *, uint8_t, uint8_t, uint8_t);
 void set_bits(uint8_t *, uint8_t *, uint32_t, uint8_t);

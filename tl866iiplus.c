@@ -61,7 +61,7 @@
 #define TL866IIPLUS_BOOTLOADER_ERASE	 0x3C
 #define TL866IIPLUS_SWITCH		 0x3D
 
-// Hardware Bit Banging
+/* Hardware Bit Banging */
 #define TL866IIPLUS_SET_VCC_VOLTAGE	 0x1B
 #define TL866IIPLUS_SET_VPP_VOLTAGE	 0x1C
 #define TL866IIPLUS_RESET_PIN_DRIVERS	 0x2D
@@ -82,8 +82,8 @@ typedef struct zif_pins_s {
 	uint8_t mask;
 } zif_pins_t;
 
-// clang-format off
-// 21 VPP pins.
+/* clang-format off */
+/* 21 VPP pins. */
 static zif_pins_t vpp_pins[] =
 {
 	{ .pin = 1, .byte = 10, .mask = 0x01 },
@@ -109,7 +109,7 @@ static zif_pins_t vpp_pins[] =
 	{ .pin = 40, .byte = 9, .mask = 0x80 }
 };
 
-// 32 VCC Pins.
+/* 32 VCC Pins. */
 static zif_pins_t vcc_pins[] =
 {
 	{ .pin = 1, .byte = 8, .mask = 0x01 },
@@ -146,7 +146,7 @@ static zif_pins_t vcc_pins[] =
 	{ .pin = 40, .byte = 11, .mask = 0x80 }
 };
 
-// 34 GND Pins.
+/* 34 GND Pins. */
 static zif_pins_t gnd_pins[] =
 {
 	{ .pin = 1, .byte = 8, .mask = 0x01 },
@@ -209,7 +209,7 @@ enum GND_PINS
     GND39,	GND40
 };
 
-// clang-format on
+/* clang-format on */
 int tl866iiplus_begin_transaction(minipro_handle_t *handle)
 {
 	uint8_t msg[64];
@@ -219,6 +219,7 @@ int tl866iiplus_begin_transaction(minipro_handle_t *handle)
 	memset(msg, 0x00, sizeof(msg));
 	if (!handle->device->flags.custom_protocol) {
 		/*
+      // FIXME does this need to be here anymore? (DG)
       // Send a NAND init
       if(handle->device->chip_type == MP_NAND){
               msg[0] = TL866IIPLUS_NAND_INIT;
@@ -319,7 +320,7 @@ int tl866iiplus_read_block(minipro_handle_t *handle, uint8_t type,
 	if (msg_send(handle->usb_handle, msg, 8))
 		return EXIT_FAILURE;
 
-	// data_memory2 page is always read over endpoint 1
+	/* data_memory2 page is always read over endpoint 1 */
 	if (type == TL866IIPLUS_READ_USER_DATA)
 		return msg_recv(handle->usb_handle, buf, len);
 	return read_payload(handle->usb_handle, buf, len);
@@ -348,17 +349,17 @@ int tl866iiplus_write_block(minipro_handle_t *handle, uint8_t type,
 	msg[0] = type;
 	format_int(&(msg[2]), len, 2, MP_LITTLE_ENDIAN);
 	format_int(&(msg[4]), addr, 4, MP_LITTLE_ENDIAN);
-	if (len < 57) { // If the header + payload is up to 64 bytes
+	if (len < 57) { /* If the header + payload is up to 64 bytes */
 		memcpy(&(msg[8]), buf,
-		       len); // Send the message over the endpoint 1
+		       len); /* Send the message over the endpoint 1 */
 		if (msg_send(handle->usb_handle, msg, 8 + len))
 			return EXIT_FAILURE;
-	} else { // Otherwise send only the header over the endpoint 1
+	} else { /* Otherwise send only the header over the endpoint 1 */
 		if (msg_send(handle->usb_handle, msg, 8))
 			return EXIT_FAILURE;
 		if (write_payload(handle->usb_handle, buf,
 				  handle->device->write_buffer_size))
-			return EXIT_FAILURE; // And payload to the endp.2 and 3
+			return EXIT_FAILURE; /* And payload to the endp.2 and 3 */
 	}
 	return EXIT_SUCCESS;
 }
@@ -421,7 +422,7 @@ int tl866iiplus_write_fuses(minipro_handle_t *handle, uint8_t type,
 		msg[1] = handle->device->protocol_id;
 		msg[2] = items_count;
 		format_int(&msg[4], handle->device->code_memory_size - 0x38, 4,
-			   MP_LITTLE_ENDIAN); // 0x38, firmware bug?
+			   MP_LITTLE_ENDIAN); /* 0x38, firmware bug? */
 		memcpy(&(msg[8]), buffer, length);
 	}
 	return msg_send(handle->usb_handle, msg, sizeof(msg));
@@ -455,16 +456,18 @@ int tl866iiplus_get_chip_id(minipro_handle_t *handle, uint8_t *type,
 		return EXIT_FAILURE;
 	if (msg_recv(handle->usb_handle, msg, 6))
 		return EXIT_FAILURE;
-	*type = msg[0]; // The Chip ID type (1-5)
+	*type = msg[0]; /* The Chip ID type (1-5) */
 	format = (*type == MP_ID_TYPE3 || *type == MP_ID_TYPE4 ?
 			  MP_LITTLE_ENDIAN :
 			  MP_BIG_ENDIAN);
-	// The length byte is always 1-4 but never know, truncate to max. 4 bytes.
+
+	/* The length byte is always 1-4 but never know,
+	 * truncate to max. 4 bytes. */
 	id_length = handle->device->chip_id_bytes_count > 4 ?
 			    4 :
 			    handle->device->chip_id_bytes_count;
 	*device_id = (id_length ? load_int(&(msg[2]), id_length, format) :
-				  0); // Check for positive length.
+				  0); /* Check for positive length. */
 	return EXIT_SUCCESS;
 }
 
@@ -540,13 +543,13 @@ int tl866iiplus_get_ovc_status(minipro_handle_t *handle,
 	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
 		return EXIT_FAILURE;
 	if (status && !handle->device->flags.custom_protocol) {
-		// This is verify while writing feature.
+		/* This is verify while writing feature. */
 		status->error = msg[0];
 		status->address = load_int(&msg[8], 4, MP_LITTLE_ENDIAN);
 		status->c1 = load_int(&msg[2], 2, MP_LITTLE_ENDIAN);
 		status->c2 = load_int(&msg[4], 2, MP_LITTLE_ENDIAN);
 	}
-	*ovc = msg[12]; // return the ovc status
+	*ovc = msg[12]; /* return the ovc status */
 	return EXIT_SUCCESS;
 }
 
@@ -561,7 +564,7 @@ int tl866iiplus_unlock_tsop48(minipro_handle_t *handle, uint8_t *status)
 	srand(time(NULL));
 	for (i = 8; i < 16; i++) {
 		msg[i] = (uint8_t)rand();
-		// Calculate the crc16
+		/* Calculate the crc16 */
 		crc = (crc >> 8) | (crc << 8);
 		crc ^= msg[i];
 		crc ^= (crc & 0xFF) >> 4;
@@ -618,8 +621,9 @@ int tl866iiplus_read_jedec_row(minipro_handle_t *handle, uint8_t *buffer,
 	return EXIT_SUCCESS;
 }
 
-/* Firmware updater section
-//////////////////////////////////////////////////////////////////////////////////
+/*****************************************************************************
+ * Firmware updater section
+ *****************************************************************************
 
 This is the UpdateII.dat file structure.
 It has a variable size. There are small data blocks of 272 bytes each followed by the last data block which always has 2064 bytes.
@@ -643,7 +647,7 @@ The structure of each data block is as following:
 
 */
 
-// Performing a firmware update
+/* Performing a firmware update */
 int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 {
 	uint8_t msg[264];
@@ -655,13 +659,13 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 	}
 
 	off_t file_size = st.st_size;
-	// Check the update.dat size
+	/* Check the update.dat size */
 	if (file_size < 3100 || file_size > 1048576) {
 		fprintf(stderr, "%s file size error!\n", firmware);
 		return EXIT_FAILURE;
 	}
 
-	// Open the update.dat firmware file
+	/* Open the update.dat firmware file */
 	FILE *file = fopen(firmware, "rb");
 	if (!file) {
 		fprintf(stderr, "%s open error!: ", firmware);
@@ -675,7 +679,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		return EXIT_FAILURE;
 	}
 
-	// Read the updateII.dat file
+	/* Read the updateII.dat file */
 	if (fread(update_dat, sizeof(char), st.st_size, file) != st.st_size) {
 		fprintf(stderr, "%s file read error!\n", firmware);
 		fclose(file);
@@ -684,7 +688,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 	}
 	fclose(file);
 
-	// Read the blocks count and check if correct
+	/* Read the blocks count and check if correct */
 	uint32_t blocks = load_int(update_dat + 1032, 4, MP_LITTLE_ENDIAN);
 	if (blocks * 272 + 3100 != file_size) {
 		fprintf(stderr, "%s file size error!\n", firmware);
@@ -692,18 +696,18 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		return EXIT_FAILURE;
 	}
 
-	// Compute the file CRC and compare
+	/* Compute the file CRC and compare */
 	uint32_t crc = 0xFFFFFFFF;
-	// Note the order in which the crc is calculated!
-	// First the data blocks crc
+	/* Note the order in which the crc is calculated! */
+	/* First the data blocks crc*/
 	if (blocks > 0) {
 		crc = crc32(update_dat + 1036, blocks * 272, crc);
 	}
-	// Second the last block crc
+	/* Second the last block crc */
 	crc = crc32(update_dat + blocks * 272 + 1036, 2064, crc);
-	// And last the xortable+blocks_count crc
+	/* And last the xortable+blocks_count crc */
 	crc = crc32(update_dat + 8, 1028, crc);
-	// The computed CRC32 must match the File CRC from the offset 4
+	/* The computed CRC32 must match the File CRC from the offset 4 */
 	if (~crc != load_int(update_dat + 4, 4, MP_LITTLE_ENDIAN)) {
 		fprintf(stderr, "%s file CRC error!\n", firmware);
 		free(update_dat);
@@ -711,24 +715,22 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 	}
 
 	/*
-   * Decrypting each data block (by deobfuscating the address)
-   */
+	 * Decrypting each data block (by deobfuscating the address)
+	 */
 
-	size_t ptr = 1036; // This is the offset of the first data block
+	size_t ptr = 1036; /* This is the offset of the first data block */
 
-	// The updateII.dat contains a xor table of 1024 bytes length at the offset 8.
-	// This table is used to obfuscate the block address.
+	/* The updateII.dat contains a xor table of 1024 bytes length at
+	 * the offset 8.  This table is used to obfuscate the block address. */
 	uint32_t xorptr;
 	int i, j;
 	for (i = 0; i < blocks; i++) {
 		xorptr = load_int(
 			update_dat + ptr + 4, 4,
-			MP_LITTLE_ENDIAN); // Load the xor table pointer
-
-		/*
-     * The destination address of each data block (offset 8) is obfuscated
-     * by xoring the LSB part of the address against a xortable 264 times (44*6)
-     */
+			MP_LITTLE_ENDIAN); /* Load the xor table pointer */
+		/* The destination address of each data block (offset 8)
+		 * is obfuscated by xoring the LSB part of the address
+		 * against a xortable 264 times (44*6) */
 		for (j = 0; j < 44; j++) {
 			update_dat[ptr + 8] ^= update_dat[(xorptr & 0x3FF) + 8];
 			update_dat[ptr + 8] ^=
@@ -743,7 +745,9 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 				update_dat[((xorptr + 5) & 0x3FF) + 8];
 			xorptr += 6;
 		}
-		// After deobfuscating the address calculate the block crc and compare
+
+		/* After deobfuscating the address calculate the block
+		 * crc and compare */
 		if (crc32(update_dat + ptr + 4, 268, 0) !=
 		    load_int(update_dat + ptr, 4, MP_LITTLE_ENDIAN)) {
 			fprintf(stderr, "%s file CRC error!\n", firmware);
@@ -753,10 +757,8 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		ptr += 272;
 	}
 
-	/*
-   * The last data block destination address is obfuscated
-   * by xoring the LSB part of the address against a xortable 2056 times (514*4)
-   */
+	/* The last data block destination address is obfuscated by xoring the
+	 * LSB part of the address against a xortable 2056 times (514*4) */
 	xorptr = load_int(update_dat + ptr + 4, 4, MP_LITTLE_ENDIAN);
 	for (i = 0; i < 514; i++) {
 		update_dat[ptr + 8] ^= update_dat[(xorptr & 0x3FF) + 8];
@@ -765,7 +767,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		update_dat[ptr + 8] ^= update_dat[((xorptr + 3) & 0x3FF) + 8];
 		xorptr += 4;
 	}
-	// After deobfuscating the address calculate the block crc and compare
+	/* After deobfuscating the address calculate the block crc and compare */
 	if (crc32(update_dat + ptr + 4, 2060, 0) !=
 	    load_int(update_dat + ptr, 4, MP_LITTLE_ENDIAN)) {
 		fprintf(stderr, "%s file CRC error!\n", firmware);
@@ -791,7 +793,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		return EXIT_FAILURE;
 	}
 
-	// Switching to boot mode if necessary
+	/* Switching to boot mode if necessary */
 	if (handle->status == MP_STATUS_NORMAL) {
 		fprintf(stderr, "Switching to bootloader... ");
 		fflush(stderr);
@@ -824,7 +826,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		fprintf(stderr, "OK\n");
 	}
 
-	// Erase device
+	/* Erase device */
 	fprintf(stderr, "Erasing... ");
 	fflush(stderr);
 	memset(msg, 0, sizeof(msg));
@@ -846,35 +848,35 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		return EXIT_FAILURE;
 	}
 
-	// Reflash firmware
+	/* Reflash firmware */
 	fprintf(stderr, "OK\n");
 	fprintf(stderr, "Reflashing... ");
 	fflush(stderr);
 
-	ptr = 1036; // First firmware block
+	ptr = 1036; /* First firmware block */
 	for (i = 0; i < blocks; i++) {
 		msg[0] = TL866IIPLUS_BOOTLOADER_WRITE;
-		msg[1] = update_dat[ptr + 12] & 0x7F; // Xor table index
-		msg[2] = 0;			      // Data Length LSB
-		msg[3] = 1; // Data length MSB (256 bytes)
-		memcpy(&msg[4], &update_dat[ptr + 8], 4); // Destination address
-		memcpy(&msg[8], &update_dat[ptr + 16], 256); // 256  bytes data
+		msg[1] = update_dat[ptr + 12] & 0x7F; /* Xor table index */
+		msg[2] = 0;			      /* Data Length LSB */
+		msg[3] = 1; /* Data length MSB (256 bytes) */
+		memcpy(&msg[4], &update_dat[ptr + 8], 4); /* Destination address */
+		memcpy(&msg[8], &update_dat[ptr + 16], 256); /* 256 bytes data */
 
-		// Send the command to the endpoint 1
+		/* Send the command to the endpoint 1 */
 		if (msg_send(handle->usb_handle, msg, 8)) {
 			fprintf(stderr, "\nReflash failed\n");
 			free(update_dat);
 			return EXIT_FAILURE;
 		}
 
-		// And the payload to the endpoints 2 and 3
+		/* And the payload to the endpoints 2 and 3 */
 		if (write_payload(handle->usb_handle, msg + 8, 256)) {
 			fprintf(stderr, "\nReflash failed\n");
 			free(update_dat);
 			return EXIT_FAILURE;
 		}
 
-		// Check if the firmware block was successfully written
+		/* Check if the firmware block was successfully written */
 		memset(msg, 0, sizeof(msg));
 		msg[0] = TL866IIPLUS_REQUEST_STATUS;
 		if (msg_send(handle->usb_handle, msg, 8)) {
@@ -898,7 +900,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 		fflush(stderr);
 	}
 
-	// Last firmware block
+	/* Last firmware block */
 	uint8_t block[2056];
 
 	block[0] = TL866IIPLUS_BOOTLOADER_WRITE;
@@ -909,19 +911,19 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 	memcpy(&block[8], &update_dat[ptr + 16], 2048);
 	free(update_dat);
 
-	// Send the command to the endpoint 1
+	/* Send the command to the endpoint 1 */
 	if (msg_send(handle->usb_handle, block, 8)) {
 		fprintf(stderr, "\nReflash failed\n");
 		return EXIT_FAILURE;
 	}
 
-	// And the payload to the endpoints 2 and 3
+	/* And the payload to the endpoints 2 and 3 */
 	if (write_payload(handle->usb_handle, block + 8, 2048)) {
 		fprintf(stderr, "\nReflash failed\n");
 		return EXIT_FAILURE;
 	}
 
-	// Check if the firmware block was successfully written
+	/* Check if the firmware block was successfully written */
 	memset(msg, 0, sizeof(msg));
 	msg[0] = TL866IIPLUS_REQUEST_STATUS;
 	if (msg_send(handle->usb_handle, msg, 8)) {
@@ -939,7 +941,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 	}
 	fprintf(stderr, "\r\e[KReflashing... 100%%\n");
 
-	// Switching back to normal mode
+	/* Switching back to normal mode */
 	fprintf(stderr, "Resetting device... ");
 	fflush(stderr);
 	if (minipro_reset(handle)) {
@@ -964,7 +966,7 @@ int tl866iiplus_firmware_update(minipro_handle_t *handle, const char *firmware)
 int tl866iiplus_pin_test(minipro_handle_t *handle)
 {
 
-	// for mapping the programmer pin numbers to the device pin numbers
+	/* for mapping the programmer pin numbers to the device pin numbers */
 	int p_pins = 40;
 	int d_pins = handle->device->package_details.pin_count;
 	int p_pin = 0;
@@ -977,7 +979,7 @@ int tl866iiplus_pin_test(minipro_handle_t *handle)
 	db_data_t db_data;
 	memset(&db_data, 0, sizeof(db_data));
 
-	// Get the chip pin mask for testing
+	/* Get the chip pin mask for testing */
 	db_data.infoic_path = handle->cmdopts->infoic_path;
 	db_data.logicic_path = handle->cmdopts->logicic_path;
 	db_data.index = handle->device->pin_map;
@@ -985,7 +987,7 @@ int tl866iiplus_pin_test(minipro_handle_t *handle)
 	if (!map)
 		return EXIT_FAILURE;
 
-	// Set the desired output pins
+	/* Set the desired output pins */
 	memset(msg, 0, sizeof(msg));
 	msg[0] = TL866IIPLUS_SET_DIR;
 	memset(&msg[8], 0x01, 40);
@@ -996,30 +998,30 @@ int tl866iiplus_pin_test(minipro_handle_t *handle)
 	}
 
 	int ret = EXIT_FAILURE;
-	// Set the ZIF socket pins direction
+	/* Set the ZIF socket pins direction */
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Set output pins to logic one
+	/* Set output pins to logic one */
 	msg[0] = TL866IIPLUS_SET_OUT;
 	memset(&msg[8], 0x01, 40);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Enable right side ZIF socket pull-up resistors
+	/* Enable right side ZIF socket pull-up resistors */
 	msg[0] = TL866IIPLUS_SET_PULLUPS;
 	memset(&msg[28], 0x00, 20);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Enable left side ZIF socket pull-down resistors
+	/* Enable left side ZIF socket pull-down resistors */
 	msg[0] = TL866IIPLUS_SET_PULLDOWNS;
 	memset(&msg[8], 0x00, 20);
 	memset(&msg[28], 0x01, 20);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Read ZIF socket pins and save the left side pins status
+	/* Read ZIF socket pins and save the left side pins status */
 	msg[0] = TL866IIPLUS_READ_PINS;
 	if (msg_send(handle->usb_handle, msg, 8))
 		goto cleanup;
@@ -1027,21 +1029,21 @@ int tl866iiplus_pin_test(minipro_handle_t *handle)
 		goto cleanup;
 	memcpy(pins, &msg[8], 20);
 
-	// Enable left side ZIF socket pull-up resistors
+	/* Enable left side ZIF socket pull-up resistors */
 	msg[0] = TL866IIPLUS_SET_PULLUPS;
 	memset(&msg[8], 0x00, 20);
 	memset(&msg[28], 0x01, 20);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Enable right side ZIF socket pull-down resistors
+	/* Enable right side ZIF socket pull-down resistors */
 	msg[0] = TL866IIPLUS_SET_PULLDOWNS;
 	memset(&msg[8], 0x01, 20);
 	memset(&msg[28], 0x00, 20);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Read ZIF socket pins and save the right side pins status
+	/* Read ZIF socket pins and save the right side pins status */
 	msg[0] = TL866IIPLUS_READ_PINS;
 	if (msg_send(handle->usb_handle, msg, 8))
 		goto cleanup;
@@ -1049,40 +1051,40 @@ int tl866iiplus_pin_test(minipro_handle_t *handle)
 		goto cleanup;
 	memcpy(&pins[20], &msg[28], 20);
 
-	// Set output pins to logic zero
+	/* Set output pins to logic zero */
 	msg[0] = TL866IIPLUS_SET_OUT;
 	memset(&msg[8], 0x00, 40);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Reset ZIF socket pins direction
+	/* Reset ZIF socket pins direction */
 	msg[0] = TL866IIPLUS_SET_DIR;
 	memset(&msg[8], 0x01, 40);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Reset pull-ups
+	/* Reset pull-ups */
 	msg[0] = TL866IIPLUS_SET_PULLUPS;
 	memset(&msg[8], 0x01, 40);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// Reset pull-downs
+	/* Reset pull-downs */
 	msg[0] = TL866IIPLUS_SET_PULLDOWNS;
 	memset(&msg[8], 0x00, 40);
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		goto cleanup;
 
-	// End of transaction
+	/* End of transaction */
 	msg[0] = TL866IIPLUS_END_TRANS;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg)))
 		return EXIT_FAILURE;
 
-	// Now check for bad pin contact
+	/* Now check for bad pin contact */
 	ret = EXIT_SUCCESS;
 	for (i = 0; i < map->mask_count; i++) {
 
-		// map programmer pin# to device pin#
+		/* map programmer pin# to device pin# */
 		p_pin = map->mask[i];
 		d_pin = p_pin;
 		if (p_pin > x_pin) d_pin = p_pin - pno;
@@ -1100,7 +1102,7 @@ cleanup:
 	return ret;
 }
 
-// Pull: 0=Pull-up, 1=Pull-down
+/* Pull: 0=Pull-up, 1=Pull-down */
 static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 {
 	uint8_t *vector = handle->device->vectors;
@@ -1119,12 +1121,12 @@ static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 
 		msg[0] = TL866IIPLUS_LOGIC_IC_TEST_VECTOR;
 		msg[1] = handle->device->voltages.vcc;
-		msg[1] |= pull << 7; // Set the pull-up/pull-down
+		msg[1] |= pull << 7; /* Set the pull-up/pull-down */
 		format_int(&msg[2], pin_count, 2, MP_LITTLE_ENDIAN);
 		format_int(&msg[4], n, 4, MP_LITTLE_ENDIAN);
 
 		int i;
-		//Pack the vector to 2 pin/byte
+		/* Pack the vector to 2 pin/byte */
 		for (i = 0; i < handle->device->package_details.pin_count;
 		     i++) {
 			if (i & 1)
@@ -1134,7 +1136,7 @@ static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 			vector++;
 		}
 
-		// Send the test vector and read the pin status
+		/* Send the test vector and read the pin status */
 		if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 			free(result);
 			return NULL;
@@ -1144,7 +1146,7 @@ static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 			return NULL;
 		}
 
-		// Unpack the result from 2 pin/byte to 1 pin/byte
+		/* Unpack the result from 2 pin/byte to 1 pin/byte */
 		for (i = 0; i < handle->device->package_details.pin_count; i++)
 			*out++ = (msg[8 + i / 2] >> (4 * (i & 1))) & 0xf;
 	}
@@ -1161,14 +1163,15 @@ static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
  * Z(high impedance) state as 1 in step 1 when the pull-up is activated and
  * 0 in step 2 when the pull-down is activated.
  * While for chips with open collector/open drain output we need to perform
- * these two steps to detect the Z state, for chips with totem-pole outputs this is
- * not really necessary but, sometimes internal issues can be detected this way
- * like burned H side or L side output transistors.
- * The C (clock) state is performed in firmware by first pulsing the pin marked as
- * C and then all pins are read back.
+ * these two steps to detect the Z state, for chips with totem-pole outputs
+ * this is not really necessary but, sometimes internal issues can be
+ * detected this way like burned H side or L side output transistors.
+ * The C (clock) state is performed in firmware by first pulsing the pin
+ * marked as C and then all pins are read back.
  * The X (don't care) state will leave the pin unconnected.
  * The V (VCC) and G (Ground) state will designate the power supply pins.
  */
+
 int tl866iiplus_logic_ic_test(minipro_handle_t *handle)
 {
 	uint8_t *vector = handle->device->vectors;
@@ -1176,10 +1179,10 @@ int tl866iiplus_logic_ic_test(minipro_handle_t *handle)
 	uint8_t *second_step = NULL;
 	int ret = EXIT_FAILURE;
 
-	if (!(first_step = do_ic_test(handle, 0))) { // Pull-up active
+	if (!(first_step = do_ic_test(handle, 0))) { /* Pull-up active */
 		fprintf(stderr,
 			"Error running the first step of logic test.\n");
-	} else if (!(second_step = do_ic_test(handle, 1))) { //Pull-down active
+	} else if (!(second_step = do_ic_test(handle, 1))) { /* Pull-down active */
 		fprintf(stderr,
 			"Error running the second step of logic test.\n");
 	} else {
@@ -1200,15 +1203,15 @@ int tl866iiplus_logic_ic_test(minipro_handle_t *handle)
 			     pin++) {
 				err = 0;
 				switch (vector[n]) {
-				case LOGIC_L: // Pin must be 0 in both steps
+				case LOGIC_L: /* Pin must be 0 in both steps */
 					if (first_step[n] || second_step[n])
 						err = 1;
 					break;
-				case LOGIC_H: // Pin must be 1 in both steps
+				case LOGIC_H: /* Pin must be 1 in both steps */
 					if (!first_step[n] || !second_step[n])
 						err = 1;
 					break;
-				case LOGIC_Z: // Pin must be 1 in step 1 and 0 in step 2
+				case LOGIC_Z: /* Pin must be 1 in step 1 and 0 in step 2 */
 					if (!first_step[n] || second_step[n])
 						err = 1;
 					break;
@@ -1242,26 +1245,26 @@ int tl866iiplus_logic_ic_test(minipro_handle_t *handle)
 static int init_zif(minipro_handle_t *handle, uint8_t pullup)
 {
 	uint8_t msg[48];
-	// Reset pin drivers state
+	/* Reset pin drivers state */
 	msg[0] = TL866IIPLUS_RESET_PIN_DRIVERS;
 	if (msg_send(handle->usb_handle, msg, 8)) {
 		return EXIT_FAILURE;
 	}
 
-	// Set all zif pins to input
+	/* Set all zif pins to input */
 	memset(&msg[8], 0x01, 40);
 	msg[0] = TL866IIPLUS_SET_DIR;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 		return EXIT_FAILURE;
 	}
 
-	// Set pull-up resistors (0=enable, 1=disable)
+	/* Set pull-up resistors (0=enable, 1=disable) */
 	memset(&msg[8], pullup, 40);
 	msg[0] = TL866IIPLUS_SET_PULLUPS;
 	return msg_send(handle->usb_handle, msg, sizeof(msg));
 }
 
-// TL866II+ hardware check
+/* TL866II+ hardware check */
 int tl866iiplus_hardware_check(minipro_handle_t *handle)
 {
 	uint8_t msg[48], read_buffer[48];
@@ -1269,16 +1272,16 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 
 	memset(msg, 0, sizeof(msg));
 
-	// Testing 21 VPP pin drivers
+	/* Testing 21 VPP pin drivers */
 
-	// Init ZIF socket, no pull-up resistors
+	/* Init ZIF socket, no pull-up resistors */
 	if (init_zif(handle, 1))
 		return EXIT_FAILURE;
 
 	for (i = 0; i < 21; i++) {
 		memset(&msg[8], 0, 40);
 		msg[0] = TL866IIPLUS_SET_VPP_PIN;
-		msg[vpp_pins[i].byte] = vpp_pins[i].mask; // set the vpp pin
+		msg[vpp_pins[i].byte] = vpp_pins[i].mask; /* set the vpp pin */
 
 		if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 			minipro_close(handle);
@@ -1310,16 +1313,16 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	}
 	fprintf(stderr, "\n");
 
-	// Testing 32 VCC pin drivers
+	/* Testing 32 VCC pin drivers */
 
-	// Init ZIF socket, no pull-up resistors
+	/* Init ZIF socket, no pull-up resistors */
 	if (init_zif(handle, 1))
 		return EXIT_FAILURE;
 
 	for (i = 0; i < 32; i++) {
 		memset(&msg[8], 0, 40);
 		msg[0] = TL866IIPLUS_SET_VCC_PIN;
-		msg[vcc_pins[i].byte] = vcc_pins[i].mask; // set the vcc pin
+		msg[vcc_pins[i].byte] = vcc_pins[i].mask; /* set the vcc pin */
 
 		if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 			minipro_close(handle);
@@ -1351,16 +1354,16 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	}
 	fprintf(stderr, "\n");
 
-	// Testing 34 GND pin drivers
+	/* Testing 34 GND pin drivers */
 
-	// Init ZIF socket, active pull-up resistors
+	/* Init ZIF socket, active pull-up resistors */
 	if (init_zif(handle, 0))
 		return EXIT_FAILURE;
 
 	for (i = 0; i < 34; i++) {
 		memset(&msg[8], 0, 40);
 		msg[0] = TL866IIPLUS_SET_GND_PIN;
-		msg[gnd_pins[i].byte] = gnd_pins[i].mask; // set the gnd pin
+		msg[gnd_pins[i].byte] = gnd_pins[i].mask; /* set the gnd pin */
 
 		if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 			minipro_close(handle);
@@ -1392,27 +1395,27 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	}
 	fprintf(stderr, "\n\n");
 
-	// Testing VPP overcurrent protection
+	/* Testing VPP overcurrent protection */
 
-	// Init ZIF socket, no pull-up resistors
-	if (init_zif(handle, 1))
+	/* Init ZIF socket, no pull-up resistors */
+ 	if (init_zif(handle, 1))
 		return EXIT_FAILURE;
 
-	// Set VPP on pin1
+	/* Set VPP on pin1 */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_VPP_PIN;
 	msg[vpp_pins[VPP1].byte] = vpp_pins[VPP1].mask;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 		return EXIT_FAILURE;
 	}
-	// Set GND also on pin1
+	/* Set GND also on pin1 */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_GND_PIN;
 	msg[gnd_pins[GND1].byte] = gnd_pins[GND1].mask;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 		return EXIT_FAILURE;
 	}
-	// Reset pins
+	/* Reset pins */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_GND_PIN;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
@@ -1420,7 +1423,7 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	}
 
 	msg[0] =
-		TL866IIPLUS_READ_PINS; // Read back the OVC status (should be active)
+		TL866IIPLUS_READ_PINS; /* Read back the OVC status (should be active) */
 	if (msg_send(handle->usb_handle, msg, 8)) {
 		return EXIT_FAILURE;
 	}
@@ -1434,13 +1437,13 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 		errors++;
 	}
 
-	// Testing VCC overcurrent protection
+	/* Testing VCC overcurrent protection */
 
-	// Init ZIF socket, no pull-up resistors
+	/* Init ZIF socket, no pull-up resistors */
 	if (init_zif(handle, 1))
 		return EXIT_FAILURE;
 
-	// Set VCC voltage to 4.5V
+	/* Set VCC voltage to 4.5V */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_VCC_VOLTAGE;
 	msg[8] = 0x01;
@@ -1448,21 +1451,21 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 		return EXIT_FAILURE;
 	}
 
-	// Set VCC on pin1
+	/* Set VCC on pin1 */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_VCC_PIN;
 	msg[vcc_pins[VCC1].byte] = vcc_pins[VCC1].mask;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 		return EXIT_FAILURE;
 	}
-	// Set GND also on pin1
+	/* Set GND also on pin1 */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_GND_PIN;
 	msg[gnd_pins[GND1].byte] = gnd_pins[GND1].mask;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
 		return EXIT_FAILURE;
 	}
-	// Reset pins
+	/* Reset pins */
 	memset(&msg[8], 0, 40);
 	msg[0] = TL866IIPLUS_SET_GND_PIN;
 	if (msg_send(handle->usb_handle, msg, sizeof(msg))) {
@@ -1470,7 +1473,7 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	}
 
 	msg[0] =
-		TL866IIPLUS_READ_PINS; // Read back the OVC status (should be active)
+		TL866IIPLUS_READ_PINS; /* Read back the OVC status (should be active) */
 	if (msg_send(handle->usb_handle, msg, 8)) {
 		return EXIT_FAILURE;
 	}
@@ -1491,12 +1494,14 @@ int tl866iiplus_hardware_check(minipro_handle_t *handle)
 	else
 		fprintf(stderr, "\nHardware test completed successfully!\n");
 
-	// Reset pin drivers
+	/* Reset pin drivers */
 	msg[0] = TL866IIPLUS_RESET_PIN_DRIVERS;
 	return msg_send(handle->usb_handle, msg, 8);
 }
 
-//// Bit banging functions
+/************************
+ * Bit banging functions
+ ************************/
 static void set_pin(zif_pins_t *pins, uint8_t size, uint8_t *out, uint8_t pin)
 {
 	int i;
@@ -1510,7 +1515,7 @@ static void set_pin(zif_pins_t *pins, uint8_t size, uint8_t *out, uint8_t pin)
 int tl866iiplus_reset_state(minipro_handle_t *handle)
 {
 	uint8_t msg[8];
-	// Reset pin drivers state
+	/* Reset pin drivers state */
 	msg[0] = TL866IIPLUS_RESET_PIN_DRIVERS;
 	return msg_send(handle->usb_handle, msg, sizeof(msg));
 }
@@ -1560,7 +1565,7 @@ int tl866iiplus_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
 	uint8_t msg[48];
 	int i;
 
-	// Set GND pins
+	/* Set GND pins */
 	memset(msg, 0x00, sizeof(msg));
 	msg[0] = TL866IIPLUS_SET_GND_PIN;
 	for (i = 0; i < 40; i++) {
@@ -1574,7 +1579,7 @@ int tl866iiplus_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
 		return EXIT_FAILURE;
 	}
 
-	// Set VCC pins
+	/* Set VCC pins */
 	memset(msg, 0x00, sizeof(msg));
 	msg[0] = TL866IIPLUS_SET_VCC_PIN;
 	for (i = 0; i < 40; i++) {
@@ -1588,7 +1593,7 @@ int tl866iiplus_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
 		return EXIT_FAILURE;
 	}
 
-	// Set VPP pins
+	/* Set VPP pins */
 	memset(msg, 0x00, sizeof(msg));
 	msg[0] = TL866IIPLUS_SET_VPP_PIN;
 	for (i = 0; i < 40; i++) {
@@ -1616,11 +1621,11 @@ int tl866iiplus_set_voltages(minipro_handle_t *handle, uint8_t vcc, uint8_t vpp)
 	uint8_t msg[48];
 	memset(&msg, 0, sizeof(msg));
 
-	// Internal VCC table firmware map
+	/* Internal VCC table firmware map */
 	static const uint8_t vcc_t[] = { 0, 1, 2,  4,  3,  5,  6,  8,
 					 7, 9, 10, 12, 11, 13, 14, 15 };
 
-	// Internal VPP table firmware map
+	/* Internal VPP table firmware map */
 	static const uint8_t vpp_t[] = { 0,  8,	 1, 9,	2, 10, 3, 4,
 					 11, 12, 5, 13, 6, 14, 7, 15 };
 	msg[0] = TL866IIPLUS_SET_VCC_VOLTAGE;

@@ -61,7 +61,7 @@
 #define T48_BOOTLOADER_ERASE	 0x3C
 #define T48_SWITCH		 0x3D
 
-// Hardware Bit Banging
+/* Hardware Bit Banging */
 #define T48_SET_VCC_VOLTAGE	 0x1B
 #define T48_SET_VPP_VOLTAGE	 0x1C
 #define T48_RESET_PIN_DRIVERS	 0x2D
@@ -74,7 +74,7 @@
 #define T48_READ_PINS		 0x35
 #define T48_SET_OUT		 0x36
 
-//#define DEBUG_USB_MSG
+/* #define DEBUG_USB_MSG */
 #ifdef DEBUG_USB_MSG
 static void print_msg(uint8_t *buffer, size_t size)
 {
@@ -105,7 +105,7 @@ static int wrap_msg_send(void *handle, uint8_t *buffer, size_t size)
 #define msg_recv wrap_msg_recv
 #endif
 
-// clang-format on
+/* clang-format on */
 int t48_begin_transaction(minipro_handle_t *handle)
 {
 	uint8_t msg[64];
@@ -201,7 +201,7 @@ int t48_read_block(minipro_handle_t *handle, uint8_t type,
 
 	memset(msg, 0x00, sizeof(msg));
 	msg[0] = type;
-	//msg[1] = 1;
+	/* msg[1] = 1; */
 	format_int(&(msg[2]), len, 2, MP_LITTLE_ENDIAN);
 	format_int(&(msg[4]), addr, 4, MP_LITTLE_ENDIAN);
 	if (msg_send(handle->usb_handle, msg, 8))
@@ -237,7 +237,7 @@ int t48_write_block(minipro_handle_t *handle, uint8_t type,
 		return EXIT_FAILURE;
 	if (write_payload2(handle->usb_handle, buf,
 				handle->device->write_buffer_size, 0))
-		return EXIT_FAILURE; // And payload to the endp.2
+		return EXIT_FAILURE; /* And payload to the endp.2 */
 	return EXIT_SUCCESS;
 }
 
@@ -299,7 +299,7 @@ int t48_write_fuses(minipro_handle_t *handle, uint8_t type,
 		msg[1] = handle->device->protocol_id;
 		msg[2] = items_count;
 		format_int(&msg[4], handle->device->code_memory_size - 0x38, 4,
-			   MP_LITTLE_ENDIAN); // 0x38, firmware bug?
+			   MP_LITTLE_ENDIAN); /* 0x38, firmware bug? */
 		memcpy(&(msg[8]), buffer, length);
 	}
 	return msg_send(handle->usb_handle, msg, sizeof(msg));
@@ -318,16 +318,18 @@ int t48_get_chip_id(minipro_handle_t *handle, uint8_t *type,
 		return EXIT_FAILURE;
 	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
 		return EXIT_FAILURE;
-	*type = msg[0]; // The Chip ID type (1-5)
+	*type = msg[0]; /* The Chip ID type (1-5) */
 	format = (*type == MP_ID_TYPE3 || *type == MP_ID_TYPE4 ?
 			  MP_LITTLE_ENDIAN :
 			  MP_BIG_ENDIAN);
-	// The length byte is always 1-4 but never know, truncate to max. 4 bytes.
+
+	/* The length byte is always 1-4 but never know,
+	 * truncate to max. 4 bytes. */
 	id_length = handle->device->chip_id_bytes_count > 4 ?
 			    4 :
 			    handle->device->chip_id_bytes_count;
 	*device_id = (id_length ? load_int(&(msg[2]), id_length, format) :
-				  0); // Check for positive length.
+				  0); /* Check for positive length. */
 	return EXIT_SUCCESS;
 }
 
@@ -381,12 +383,12 @@ int t48_get_ovc_status(minipro_handle_t *handle,
 	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
 		return EXIT_FAILURE;
 	if (status && !handle->device->flags.custom_protocol) {
-		// This is verify while writing feature.
+		/* This is verify while writing feature. */
 		status->error = msg[0];
 		status->address = load_int(&msg[8], 4, MP_LITTLE_ENDIAN);
 		status->c1 = load_int(&msg[2], 2, MP_LITTLE_ENDIAN);
 		status->c2 = load_int(&msg[4], 2, MP_LITTLE_ENDIAN);
 	}
-	*ovc = msg[12]; // return the ovc status
+	*ovc = msg[12]; /* return the ovc status */
 	return EXIT_SUCCESS;
 }

@@ -34,7 +34,7 @@
 #define STRCASESTR strcasestr
 #endif
 
-// flags
+/* flags */
 #define MP_ERASE_MASK		 0x00000010
 #define MP_ID_MASK		 0x00000020
 #define MP_DATA_MEMORY_ADDRESS	 0x00001000
@@ -46,11 +46,11 @@
 #define MP_SUPPORTED_PROGRAMMING 0x00300000
 #define MP_DATA_ORG		 0x03000000
 
-// Opts chip_info
+/* Opts chip_info */
 #define MP_VOLTAGES1		 0x0006
 #define MP_VOLTAGES2		 0x0007
 
-// Package mask
+/* Package mask */
 #define PLCC_MASK		 0xFF000000
 #define ADAPTER_MASK		 0x000000FF
 #define ICSP_MASK		 0x0000FF00
@@ -59,7 +59,7 @@
 #define PLCC32_ADAPTER		 0xFF000000
 #define PLCC44_ADAPTER		 0xFD000000
 
-// infoic.xml name and tag names
+/* infoic.xml name and tag names */
 #define INFOIC_NAME		 "infoic.xml"
 #define LOGICIC_NAME		 "logicic.xml"
 #define DB_TAG			 "database"
@@ -88,8 +88,9 @@
 
 #define CUSTOM_PROTOCOL_MASK	 0x80000000
 
-// State machine structure used by sax database parser callback function
-// for persistent data between calls.
+/* State machine structure used by sax database parser callback function
+ * for persistent data between calls.
+ */
 typedef struct state_machine_d {
 	device_t *device;
 	int version;
@@ -109,8 +110,9 @@ typedef struct state_machine_d {
 	int skip;
 } state_machine_d_t;
 
-// State machine structure used by sax profile parser callback function
-// for persistent data between calls.
+/* State machine structure used by sax profile parser callback function
+ * for persistent data between calls.
+ */
 typedef struct state_machine_p {
 	int has_profile;
 	int found;
@@ -123,8 +125,9 @@ typedef struct state_machine_p {
 	db_data_t *db_data;
 } state_machine_p_t;
 
-// State machine structure used by sax pin map parser callback function
-// for persistent data between calls.
+/* State machine structure used by sax pin map parser callback function
+ * for persistent data between calls.
+ */
 typedef struct state_machine_m {
 	int has_map;
 	int found;
@@ -135,7 +138,7 @@ typedef struct state_machine_m {
 
 static int parse_profiles(state_machine_p_t *);
 
-// return pin count from package_details
+/* return pin count from package_details */
 static uint32_t get_pin_count(uint32_t package_details)
 {
 	if ((package_details & PLCC_MASK) == PLCC32_ADAPTER)
@@ -145,7 +148,7 @@ static uint32_t get_pin_count(uint32_t package_details)
 	return ((package_details & PIN_COUNT_MASK) >> 24);
 }
 
-// Parse a numeric value from an attribute
+/* Parse a numeric value from an attribute */
 static uint32_t get_attr_value(const uint8_t *xml, size_t size, char *attr_name,
 			       int *err)
 {
@@ -167,23 +170,24 @@ static uint32_t get_attr_value(const uint8_t *xml, size_t size, char *attr_name,
 	return 0;
 }
 
-// Match the whole 'str' string in a 'tag' text stream.
-// For ex. if 'tag' = "configurations>\n" or "<configurations"
-// and if we compare with 'str' =  "configurations" the result is
-// true in both cases. Strings like "conf", "config" and so on will return
-// false. The comparison is case insensitive.
+/* Match the whole 'str' string in a 'tag' text stream.
+ * For ex. if 'tag' = "configurations>\n" or "<configurations"
+ * and if we compare with 'str' =  "configurations" the result is
+ * true in both cases. Strings like "conf", "config" and so on will return
+ * false. The comparison is case insensitive.
+ */
 static int tagcmpn(const uint8_t *tag, size_t taglen, const char *str)
 {
 	if (!tag || !str || !taglen)
 		return 1;
 
-	// Find the start of substring
+	/* Find the start of substring */
 	for (; taglen; taglen--, tag++) {
 		if (isprint(*tag) && !isspace(*tag))
 			break;
 	}
 
-	// Find the end of substring
+	/* Find the end of substring */
 	size_t len = 0;
 	for (; taglen; taglen--, len++) {
 		if (iscntrl(tag[len]) || isspace(tag[len]))
@@ -195,16 +199,17 @@ static int tagcmpn(const uint8_t *tag, size_t taglen, const char *str)
 	return strncasecmp((char *)tag, str, len);
 }
 
-// Parse comma separated values from an element tag
-// There should be at least 'size' values otherwise
-// an error is returned.
+/* Parse comma separated values from an element tag
+ * There should be at least 'size' values otherwise
+ * an error is returned.
+ */
 static int get_elem_value(const uint8_t *tag, size_t taglen, char *elem_name,
 			  uint16_t *value, size_t size)
 {
 	if (tagcmpn(tag, taglen, elem_name))
 		return EXIT_FAILURE;
 
-	//Find start and end of the element data
+	/* Find start and end of the element data */
 	size_t len = 0;
 	while (*tag != '>')
 		tag++;
@@ -212,14 +217,14 @@ static int get_elem_value(const uint8_t *tag, size_t taglen, char *elem_name,
 	while (tag[len + 1] != '<')
 		len++;
 
-	// Duplicate data for strtok
+	/* Duplicate data for strtok */
 	char *b = calloc(1, len + 1);
 	memcpy(b, (char *)tag + 1, len);
 	if (!b)
 		return ERRMEM;
 	char *token = strtok(b, ",");
 
-	// Parse each token
+	/* Parse each token */
 	int i;
 	for (i = 0; i < size && token; i++) {
 		errno = 0;
@@ -238,7 +243,7 @@ static int get_elem_value(const uint8_t *tag, size_t taglen, char *elem_name,
 
 #define CONFIG ((fuse_decl_t *)(device->config))
 
-// Calculate chip ID bytes count from chip ID
+/* Calculate chip ID bytes count from chip ID */
 static uint8_t get_id_bytes_count(uint32_t chip_id)
 {
 	if (!chip_id)
@@ -252,7 +257,7 @@ static uint8_t get_id_bytes_count(uint32_t chip_id)
 	return (uint8_t)count + 1;
 }
 
-// Load a device from an xml 'ic' tag
+/* Load a device from an xml 'ic' tag */
 static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 			   size_t size, device_t *device, uint8_t version)
 {
@@ -295,23 +300,23 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	if (err)
 		return EXIT_FAILURE;
 
-	// get blank value if present
+	/* get blank value if present */
 	device->blank_value =
 		get_attr_value(xml_device, size, "blank_value", &err);
 	if (err || errno)
 		device->blank_value = 0xff;
 
-	// Get chip_ID bytes count
+	/* Get chip_ID bytes count */
 	device->chip_id_bytes_count = get_id_bytes_count(device->chip_id);
 
-	// Parse configuration name
+	/* Parse configuration name */
 	memblock = get_attribute(xml_device, size, FUSE_ATTR);
 	if (!memblock.b)
 		return EXIT_FAILURE;
 
-	// Check if there's a configuration name
+	/* Check if there's a configuration name */
 	if (strncasecmp((char *)memblock.b, "null", memblock.z)) {
-		// Initialize parser state machine
+		/* Initialize parser state machine */
 		state_machine_p_t sm;
 		memset(&sm, 0, sizeof(sm));
 		memcpy(sm.name, memblock.b, memblock.z);
@@ -328,7 +333,7 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 		device->config = sm.config;
 	}
 
-	// Unpack flags
+	/* Unpack flags */
 	device->flags.raw_flags = flags;
 	device->flags.can_erase = (flags & MP_ERASE_MASK) ? 1 : 0;
 	device->flags.has_chip_id = (flags & MP_ID_MASK) ? 1 : 0;
@@ -351,7 +356,7 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	device->flags.has_power_down = (voltages & LAST_JEDEC_BIT_IS_POWERDOWN_ENABLE)!= 0;
 	device->flags.is_powerdown_disabled = (voltages & POWERDOWN_MODE_DISABLE) != 0;
 
-	// Check for custom defined protocol
+	/* Check for custom defined protocol */
 	device->protocol_id = (uint8_t)protocol_id;
 	if (protocol_id & CUSTOM_PROTOCOL_MASK) {
 		device->flags.custom_protocol = 1;
@@ -360,13 +365,13 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	if (device->flags.custom_protocol && device->protocol_id == CP_PROM)
 		device->flags.prog_support = MP_READ_ONLY;
 
-	// Unpack voltages
+	/* Unpack voltages */
 	device->voltages.raw_voltages = voltages;
 	device->voltages.vdd = (voltages >> 12) & 0x0f;
 	device->voltages.vcc = (voltages >> 8) & 0x0f;
 	device->voltages.vpp = (voltages >> 4) & 0x0f;
 
-	// Unpacking package details
+	/* Unpacking package details */
 	device->package_details.pin_count =
 		get_pin_count(device->package_details.packed_package);
 	device->package_details.adapter =
@@ -374,15 +379,15 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	device->package_details.icsp =
 		(device->package_details.packed_package & ICSP_MASK) >> 8;
 
-	// Fill some device parameters
+	/* Fill some device parameters */
 	device->compare_mask = 0xff;
 	switch (device->chip_info) {
-	// PIC baseline devices
+	/* PIC baseline devices */
 	case PIC_INSTR_WORD_WIDTH_12:
 		device->compare_mask = 0x0fff;
 		break;
 
-	// PIC midrange/standard devices
+	/* PIC midrange/standard devices */
 	case PIC_INSTR_WORD_WIDTH_14:
 		device->compare_mask = 0x3fff;
 		if (CONFIG) {
@@ -390,15 +395,15 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 		}
 		break;
 
-	// PIC 18F/18F_J devices
+	/* PIC 18F/18F_J devices */
 	case PIC_INSTR_WORD_WIDTH_16_PIC18F:
 	case PIC_INSTR_WORD_WIDTH_16_PIC18J:
 		device->compare_mask = 0xffff;
 		device->flags.word_size = 2;
 		device->flags.has_word = 1;
 
-		// This will tell us if PIC user id is 8bit or more
-		device->flags.data_org = 0; // User ID is 8 bit
+		/* This will tell us if PIC user id is 8bit or more */
+		device->flags.data_org = 0; /* User ID is 8 bit */
 		if (CONFIG) {
 			CONFIG->rev_bits =
 				device->chip_info ==
@@ -411,7 +416,7 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	return EXIT_SUCCESS;
 }
 
-// Load a device from an xml 'ic' tag
+/* Load a device from an xml 'ic' tag */
 static int load_logic_device(const uint8_t *xml_device, size_t size,
 			     device_t *device)
 {
@@ -439,7 +444,7 @@ static int load_logic_device(const uint8_t *xml_device, size_t size,
 	return EXIT_SUCCESS;
 }
 
-// Load a device from an xml 'ic' tag
+/* Load a device from an xml 'ic' tag */
 static int load_device(db_data_t *db_data, const uint8_t *xml_device,
 		       size_t size, device_t *device, uint8_t version)
 {
@@ -463,8 +468,9 @@ static int load_device(db_data_t *db_data, const uint8_t *xml_device,
 	return ret;
 }
 
-// Compare a device by protocol ID/device ID or protocol ID/package
-// If the device match then the device name is returned in device->name
+/* Compare a device by protocol ID/device ID or protocol ID/package
+ * If the device match then the device name is returned in device->name
+ */
 static int compare_device(const uint8_t *xml_device, size_t size,
 			  device_t *device, uint8_t version)
 {
@@ -497,32 +503,34 @@ static int compare_device(const uint8_t *xml_device, size_t size,
 	return EXIT_SUCCESS;
 }
 
-// XML pin map SAX parser handler. Each xml tag pair is dispatched here.
-// The persistent state machine data are kept in parser->userdata structure
+/* XML pin map SAX parser handler. Each xml tag pair is dispatched here.
+ * The persistent state machine data are kept in parser->userdata structure
+ */
 static int map_callback(int type, const uint8_t *tag, size_t taglen,
 			Parser *parser)
 {
 	state_machine_m_t *sm = parser->userdata;
 	int err;
 
-	// If needed pin map is found and parsed or we reached the end of
-	// section skip until EOF
+	/* If needed pin map is found and parsed or we reached the end of
+	 * section skip until EOF
+	 */
 	if (sm->skip || sm->found == 3)
 		return XML_OK;
 	switch (type) {
 	case OPENTAG_:
-		// Search for 'maps' tag
+		/* Search for 'maps' tag */
 		if (!tagcmpn(tag, taglen, MAPS_TAG))
 			sm->has_map = 1;
 		if (!sm->has_map)
 			return XML_OK;
 
-		// If map was allocated search for gnd/mask tag
+		/* If map was allocated search for gnd/mask tag */
 		if (sm->map) {
-			// get gnd count
+			/* get gnd count */
 			if ((!sm->found || sm->found == 2) &&
 			    !tagcmpn(tag, taglen, GND_TAG)) {
-				// grab the 'count' attribute
+				/* grab the 'count' attribute */
 				err = XML_OK;
 
 				sm->map->gnd_count = get_attr_value(
@@ -543,21 +551,21 @@ static int map_callback(int type, const uint8_t *tag, size_t taglen,
 						sizeof(sm->map->gnd_table) /
 						sizeof(sm->map->gnd_table[0]);
 
-				// parse comma separated gnds
+				/* parse comma separated gnds */
 				err = get_elem_value(tag, taglen, GND_TAG,
 						     sm->map->gnd_table,
 						     sm->map->gnd_count);
 				if (err)
 					return EXIT_FAILURE;
 
-				sm->found |= 1; // Mark 'gnd was parsed' flag
+				sm->found |= 1; /* Mark 'gnd was parsed' flag */
 				return XML_OK;
 			}
 
-			// get mask count
+			/* get mask count */
 			if ((!sm->found || sm->found == 1) &&
 			    !tagcmpn(tag, taglen, MASK_TAG)) {
-				// grab the 'count' attribute
+				/* grab the 'count' attribute */
 				err = XML_OK;
 				sm->map->mask_count = get_attr_value(
 					tag, taglen, COUNT_ATTR, &err);
@@ -575,25 +583,25 @@ static int map_callback(int type, const uint8_t *tag, size_t taglen,
 						sizeof(sm->map->mask) /
 						sizeof(sm->map->mask[0]);
 
-				// parse comma separated masks
+				/* parse comma separated masks */
 				err = get_elem_value(tag, taglen, MASK_TAG,
 						     sm->map->mask,
 						     sm->map->mask_count);
 				if (err)
 					return EXIT_FAILURE;
 
-				sm->found |= 2; // Mark 'mask was parsed' flag
+				sm->found |= 2; /* Mark 'mask was parsed' flag */
 				return XML_OK;
 			}
 		}
 
-		// search for 'map' tag. Skip if map is already allocated
+		/* search for 'map' tag. Skip if map is already allocated */
 		if (sm->map)
 			return XML_OK;
 		if (tagcmpn(tag, taglen, MAP_TAG))
 			return XML_OK;
 
-		// map tag found, compare with needed name
+		/* map tag found, compare with needed name */
 		err = 0;
 		errno = 0;
 		size_t value = get_attr_value(tag, taglen, "index", &err);
@@ -602,7 +610,7 @@ static int map_callback(int type, const uint8_t *tag, size_t taglen,
 		if (value != sm->db_data->index)
 			return XML_OK;
 
-		// Allocate pin map
+		/* Allocate pin map */
 		sm->map = calloc(1, sizeof(pin_map_t));
 		if (!sm->map)
 			return ERRMEM;
@@ -618,8 +626,9 @@ static int map_callback(int type, const uint8_t *tag, size_t taglen,
 #define MCU_CHIP 0
 #define PLD_CHIP 1
 
-// XML profile SAX parser handler. Each xml tag pair is dispatched here.
-// The persistent state machine data are kept in parser->userdata structure
+/* XML profile SAX parser handler. Each xml tag pair is dispatched here.
+ * The persistent state machine data are kept in parser->userdata structure
+ */
 static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 			    Parser *parser)
 {
@@ -627,27 +636,28 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 	Memblock memblock;
 	int err;
 
-	// If needed configuration is found and parsed or we reached the end of
-	// section skip until EOF
+	/* If needed configuration is found and parsed or we reached the end of
+	 * section skip until EOF
+	 */
 	if (sm->skip || sm->found)
 		return XML_OK;
 	switch (type) {
 	case OPENTAG_:
-		// Search for 'configurations' tag
+		/* Search for 'configurations' tag */
 		if (!tagcmpn(tag, taglen, CFGS_TAG))
 			sm->has_profile = 1;
 		if (!sm->has_profile)
 			return XML_OK;
 
-		// If config was allocated search for fuses/acw_bits tag
+		/* If config was allocated search for fuses/acw_bits tag */
 		if (sm->config && sm->type == MCU_CHIP) {
-			// MCU configuration handling
+			/* MCU configuration handling */
 			fuse_decl_t *config = (fuse_decl_t *)sm->config;
 
-			// parse fuses
+			/* parse fuses */
 			if (config->num_fuses &&
 			    sm->cur_fuse < config->num_fuses) {
-				// Get fuse name
+				/* Get fuse name */
 				memblock =
 					get_attribute(tag, taglen, NAME_ATTR);
 				if (!memblock.b)
@@ -657,7 +667,7 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				memcpy(config->fuse[sm->cur_fuse].name,
 				       memblock.b, memblock.z);
 
-				// get fuse comma separated values
+				/* get fuse comma separated values */
 				uint16_t value[2];
 				err = get_elem_value(tag, taglen, "fuse", value,
 						     2);
@@ -669,10 +679,10 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				return XML_OK;
 			}
 
-			// parse locks
+			/* parse locks */
 			if (config->num_locks &&
 			    sm->cur_lock < config->num_locks) {
-				// Get lock name
+				/* Get lock name */
 				memblock =
 					get_attribute(tag, taglen, NAME_ATTR);
 				if (!memblock.b)
@@ -682,7 +692,7 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				memcpy(config->lock[sm->cur_lock].name,
 				       memblock.b, memblock.z);
 
-				// get lock comma separated values
+				/* get lock comma separated values */
 				uint16_t value[2];
 				err = get_elem_value(tag, taglen, "lock", value,
 						     2);
@@ -694,9 +704,9 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				return XML_OK;
 			}
 
-			// get fuse count
+			/* get fuse count */
 			if (sm->config && !tagcmpn(tag, taglen, FUSES_TAG)) {
-				// grab the 'count' attribute
+				/* grab the 'count' attribute */
 				err = XML_OK;
 				config->num_fuses = get_attr_value(
 					tag, taglen, COUNT_ATTR, &err);
@@ -709,9 +719,9 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				return err;
 			}
 
-			// get lock count
+			/* get lock count */
 			if (sm->config && !tagcmpn(tag, taglen, LOCKS_TAG)) {
-				// grab the 'count' attribute
+				/* grab the 'count' attribute */
 				err = XML_OK;
 				config->num_locks = get_attr_value(
 					tag, taglen, COUNT_ATTR, &err);
@@ -724,14 +734,14 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				return err;
 			}
 
-			// PLD configuration handling
+			/* PLD configuration handling */
 		} else if (sm->config && sm->type == PLD_CHIP) {
 			gal_config_t *config = (gal_config_t *)sm->config;
 
-			// parse fuses
+			/* parse fuses */
 			if (config->acw_size &&
 			    sm->cur_fuse < config->acw_size) {
-				// get fuse values
+				/* get fuse values */
 				uint16_t value;
 				err = get_elem_value(tag, taglen, "fuse",
 						     &value, 1);
@@ -742,9 +752,9 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 				return XML_OK;
 			}
 
-			// get acw_bits count
+			/* get acw_bits count */
 			if (sm->config && !tagcmpn(tag, taglen, ACW_BITS)) {
-				// grab the 'count' attribute
+				/* grab the 'count' attribute */
 				int err = XML_OK;
 				config->acw_size = get_attr_value(
 					tag, taglen, COUNT_ATTR, &err);
@@ -759,19 +769,19 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 			}
 		}
 
-		// search for 'config' tag. Skip if config is already allocated
+		/* search for 'config' tag. Skip if config is already allocated */
 		if (sm->config)
 			return XML_OK;
 		if (tagcmpn(tag, taglen, CFG_TAG))
 			return XML_OK;
 
-		// config tag found, compare with needed name
+		/* config tag found, compare with needed name */
 		memblock = get_attribute(tag, taglen, NAME_ATTR);
 		if (memblock.b &&
 		    strncasecmp((char *)memblock.b, sm->name, strlen(sm->name)))
 			return XML_OK;
 
-		// Allocate configuration
+		/* Allocate configuration */
 		memblock = get_attribute(tag, taglen, "row_width");
 		if (memblock.b) {
 			sm->config = calloc(1, sizeof(gal_config_t));
@@ -780,7 +790,7 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 			sm->type = PLD_CHIP;
 			gal_config_t *config = (gal_config_t *)sm->config;
 
-			// All parameters required
+			/* All parameters required */
 			err = 0;
 			errno = 0;
 			config->fuses_size =
@@ -814,7 +824,7 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 			sm->type = MCU_CHIP;
 			fuse_decl_t *config = (fuse_decl_t *)sm->config;
 
-			// Unused parameters can be omitted
+			/* Unused parameters can be omitted */
 			err = 0;
 			errno = 0;
 			config->num_calibytes = get_attr_value(
@@ -855,27 +865,28 @@ static int profile_callback(int type, const uint8_t *tag, size_t taglen,
 	return XML_OK;
 }
 
-// XML database SAX parser handler. Each xml tag pair is dispatched here.
-// The persistent state machine data are kept in parser->userdata structure
+/* XML database SAX parser handler. Each xml tag pair is dispatched here.
+ * The persistent state machine data are kept in parser->userdata structure
+ */
 static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 			Parser *parser)
 {
 	state_machine_d_t *sm = parser->userdata;
 	Memblock memblock;
 
-	// If end of section is reached skip until EOF
+	/* If end of section is reached skip until EOF */
 	if (sm->skip)
 		return XML_OK;
 	switch (type) {
-		// Handle both old style and self-closing tags
+		/* Handle both old style and self-closing tags */
 	case OPENTAG_:
 	case SELFCLOSE_:
-		// Get manufacturer/custom item
+		/* Get manufacturer/custom item */
 		if (!tagcmpn(tag, taglen, MANUF_TAG))
 			sm->custom = 0;
 		else if (!tagcmpn(tag, taglen, CUSTOM_TAG))
 			sm->custom = 1;
-		// Filter by "IC tag"
+		/* Filter by "IC tag" */
 		if (!tagcmpn(tag, taglen, IC_TAG)) {
 			if (sm->version == MP_TL866IIPLUS) {
 				sm->custom ? sm->tl866ii_custom_count++ :
@@ -887,7 +898,7 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 				sm->custom ? sm->logic_custom_count++ :
 					     sm->logic_count++;
 			}
-			/*
+	/*
          * Filter only devices from the desired database.
          * We pass 1 to sm->count_only to just traverse the entire xml
          * and count all chips.
@@ -896,7 +907,7 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 			    sm->db_data->version != sm->version)
 				return XML_OK;
 
-			// Grab the device name
+			/* Grab the device name */
 			memblock = get_attribute(tag, taglen, NAME_ATTR);
 			if (!memblock.b)
 				return EXIT_FAILURE;
@@ -906,9 +917,9 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 			memset(name, 0, sizeof(name));
 			memcpy(name, memblock.b, memblock.z);
 
-			// Only print device name
+			/* Only print device name */
 			if (sm->print_name) {
-				// Print only devices that match the chip ID (SPI autodetect -a)
+				/* Print only devices that match the chip ID (SPI autodetect -a) */
 				if (sm->match_id) {
 					if (compare_device(
 						    tag, taglen, sm->device,
@@ -928,7 +939,7 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 					return XML_OK;
 				}
 
-				// Print all devices that match the name (-l and -L)
+				/* Print all devices that match the name (-l and -L) */
 				if (!sm->db_data->device_name ||
 				    STRCASESTR(name,
 					       sm->db_data->device_name)) {
@@ -940,7 +951,7 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 				return XML_OK;
 			}
 
-			// Search by chip ID (get_device_from_id)
+			/* Search by chip ID (get_device_from_id) */
 			if (!sm->db_data->device_name) {
 				if (sm->found && !sm->custom)
 					return XML_OK;
@@ -952,7 +963,7 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 				return XML_OK;
 			}
 
-			// Search and load device (-p and -d)
+			/* Search and load device (-p and -d) */
 			if (strcasecmp(sm->db_data->device_name, name))
 				return XML_OK;
 			if (sm->found && !sm->custom)
@@ -963,14 +974,14 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 			sm->found = 1;
 			sm->load_vectors = 1;
 
-			// Clear the previous logic device (if any)
+			/* Clear the previous logic device (if any) */
 			if (sm->device->vectors) {
 				free(sm->device->vectors);
 				sm->device->vectors = NULL;
 				sm->device->vector_count = 0;
 			}
 		}
-		// Get database version
+		/* Get database version */
 		if (tagcmpn(tag, taglen, DB_TAG))
 			return XML_OK;
 		memblock = get_attribute(tag, taglen, DEVICE_ATTR);
@@ -1056,10 +1067,10 @@ static int sax_callback(int type, const uint8_t *tag, size_t taglen,
 	return XML_OK;
 }
 
-// Search and return database xml file
+/* Search and return database xml file */
 static FILE *get_database_file(const char *name, const char *cli_name)
 {
-	// Has the filename been overridden? If so, open it or fail now.
+	/* Has the filename been overridden? If so, open it or fail now. */
 	if (cli_name != NULL) {
 		FILE *file = fopen(cli_name, "rb");
 		if (file) {
@@ -1077,19 +1088,20 @@ static FILE *get_database_file(const char *name, const char *cli_name)
 	char path[MAX_PATH];
 	char appdata[MAX_PATH];
 
-	// Avoid buffer overruns and keep to maximum lengths
+	/* Avoid buffer overruns and keep to maximum lengths */
 	SHGetSpecialFolderPathA(NULL, appdata, CSIDL_COMMON_APPDATA, 0);
 	int count =
 		snprintf(path, sizeof(path), "%s\\minipro\\%s", appdata, name);
 
-	// C99 and Windows (before Windows 10) differ in semantics. Check
-	// both cases.
+	/* C99 and Windows (before Windows 10) differ in semantics.
+	 * Check both cases.
+	 */
 	if (count < 0 || count >= sizeof(path)) {
 		fprintf(stderr, "Path %s\\minipro\\%s is too long.\n", appdata,
 			name);
 		return NULL;
 	}
-	path[sizeof(path) - 1] = '\0'; // Not needed now, but it can't hurt!
+	path[sizeof(path) - 1] = '\0'; /* Not needed now, but it can't hurt! */
 
 #else
 
@@ -1110,35 +1122,35 @@ static FILE *get_database_file(const char *name, const char *cli_name)
 
 #endif
 
-	// Open database xml file using current directory
+	/* Open database xml file using current directory */
 	FILE *file = fopen(name, "rb");
 	if (file)
 		return file;
 
-	// Format an error message for later, just in case
+	/* Format an error message for later, just in case */
 	char err[sizeof(path) + 1024];
 	snprintf(err, sizeof(err), "%s: %s\n", path, strerror(errno));
 	err[sizeof(err) - 1] = '\0';
 
-	// No luck. Try the full path .
+	/* No luck. Try the full path. */
 	file = fopen(path, "rb");
 	if (file)
 		return file;
 
-	fputs(err, stderr); // Print previous error message too.
+	fputs(err, stderr); /* Print previous error message too. */
 	perror(name);
 	return NULL;
 }
 
-// Parse xml pin maps
+/* Parse xml pin maps */
 static int parse_maps(state_machine_m_t *sm)
 {
-	// Open database xml file
+	/* Open database xml file */
 	FILE *file = get_database_file(INFOIC_NAME, sm->db_data->infoic_path);
 	if (!file)
 		return EXIT_FAILURE;
 
-	// Begin xml parse
+	/* Begin xml parse */
 	Parser parser = { .inputcbdata = file,
 			  .worker = map_callback,
 			  .userdata = sm };
@@ -1154,15 +1166,15 @@ static int parse_maps(state_machine_m_t *sm)
 	return EXIT_SUCCESS;
 }
 
-// Parse xml profiles
+/* Parse xml profiles */
 static int parse_profiles(state_machine_p_t *sm)
 {
-	// Open database xml file
+	/* Open database xml file */
 	FILE *file = get_database_file(INFOIC_NAME, sm->db_data->infoic_path);
 	if (!file)
 		return EXIT_FAILURE;
 
-	// Begin xml parse
+	/* Begin xml parse */
 	Parser parser = { .inputcbdata = file,
 			  .worker = profile_callback,
 			  .userdata = sm };
@@ -1178,15 +1190,15 @@ static int parse_profiles(state_machine_p_t *sm)
 	return EXIT_SUCCESS;
 }
 
-// Parse given xml file
+/* Parse given xml file */
 static int parse_xml_file(void *sm, const char *name, const char *cli_name)
 {
-	// Open database xml file
+	/* Open database xml file */
 	FILE *file = get_database_file(name, cli_name);
 	if (!file)
 		return EXIT_FAILURE;
 
-	// Begin xml parse
+	/* Begin xml parse */
 	Parser parser = { .inputcbdata = file,
 			  .worker = sax_callback,
 			  .userdata = sm };
@@ -1202,7 +1214,7 @@ static int parse_xml_file(void *sm, const char *name, const char *cli_name)
 	return EXIT_SUCCESS;
 }
 
-// Parse xml database
+/* Parse xml database */
 static int parse_xml(state_machine_d_t *sm)
 {
 	int version = sm->db_data->version;
@@ -1216,7 +1228,7 @@ static int parse_xml(state_machine_d_t *sm)
 	return parse_xml_file(sm, INFOIC_NAME, sm->db_data->infoic_path);
 }
 
-// XML based device search
+/* XML based device search */
 device_t *get_device_by_name(db_data_t *db_data)
 {
 	if (!db_data->device_name)
@@ -1232,7 +1244,7 @@ device_t *get_device_by_name(db_data_t *db_data)
 	if (db_data->version == MP_T48)
 		db_data->version = MP_TL866IIPLUS;
 
-	// Initialize state machine structure
+	/* Initialize state machine structure */
 	state_machine_d_t sm;
 	memset(&sm, 0, sizeof(sm));
 	sm.device = device;
@@ -1249,7 +1261,7 @@ device_t *get_device_by_name(db_data_t *db_data)
 	return device;
 }
 
-// Get first device name found in the database from a device ID
+/* Get first device name found in the database from a device ID */
 const char *get_device_from_id(db_data_t *db_data)
 {
 	device_t device;
@@ -1260,7 +1272,7 @@ const char *get_device_from_id(db_data_t *db_data)
 	if (db_data->version == MP_TL866CS)
 		db_data->version = MP_TL866A;
 
-	// Initialize state machine structure
+	/* Initialize state machine structure  */
 	state_machine_d_t sm;
 	memset(&sm, 0, sizeof(sm));
 	sm.device = &device;
@@ -1274,8 +1286,9 @@ const char *get_device_from_id(db_data_t *db_data)
 	return sm.found ? strdup(device.name) : NULL;
 }
 
-// List all devices from XML
-// If name == NULL list all devices
+/* List all devices from XML
+ * If name == NULL list all devices
+ */
 int list_devices(db_data_t *db_data)
 {
 	device_t device;
@@ -1288,7 +1301,7 @@ int list_devices(db_data_t *db_data)
 		db_data->version = MP_TL866IIPLUS;
 	int flag = (db_data->chip_id || db_data->pin_count) ? 1 : 0;
 
-	// Initialize state machine structure
+	/* Initialize state machine structure */
 	state_machine_d_t sm;
 	memset(&sm, 0, sizeof(sm));
 	sm.device = &device;
@@ -1305,10 +1318,10 @@ int list_devices(db_data_t *db_data)
 	return EXIT_SUCCESS;
 }
 
-// Print database chip count
+/* Print database chip count */
 int print_chip_count(db_data_t *db_data)
 {
-	// Initialize state machine structure
+	/* Initialize state machine structure */
 	state_machine_d_t sm;
 	memset(&sm, 0, sizeof(sm));
 	sm.version = -1;
@@ -1327,7 +1340,7 @@ int print_chip_count(db_data_t *db_data)
 	return EXIT_SUCCESS;
 }
 
-// Get a pointer to the pin_map_t structure specified by index
+/* Get a pointer to the pin_map_t structure specified by index */
 pin_map_t *get_pin_map(db_data_t *db_data)
 {
 	if (!db_data->index) {

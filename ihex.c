@@ -50,7 +50,7 @@ typedef struct {
 	uint8_t data[255];
 } record_t;
 
-// Convert an ascii hex character
+/* Convert an ascii hex character */
 static uint8_t hex(const char hex)
 {
 	if (hex >= '0' && hex <= '9')
@@ -63,18 +63,18 @@ static uint8_t hex(const char hex)
 		return 0xff;
 }
 
-// Parse a record
+/* Parse a record */
 static record_t parse_record(uint8_t *record)
 {
 	record_t rec;
 	size_t i;
-	// Check for start code
+	/* Check for start code */
 	if (record[0] != ':') {
 		rec.result = BAD_FORMAT;
 		return rec;
 	}
 
-	// Check for valid characters
+	/* Check for valid characters */
 	for (i = 1; record[i] != '\r' && record[i] != '\n'; i++) {
 		if (hex(record[i]) > 0x0F) {
 			rec.result = BAD_FORMAT;
@@ -82,25 +82,25 @@ static record_t parse_record(uint8_t *record)
 		}
 	}
 
-	// Get the count field
+	/* Get the count field */
 	rec.count = (hex(record[1]) << 4) | hex(record[2]);
 	if (i < rec.count * 2 + MIN_RECORD_SIZE) {
 		rec.result = BAD_COUNT;
 		return rec;
 	}
 
-	// Get the record address
+	/* Get the record address */
 	rec.address = (hex(record[3]) << 12) | (hex(record[4]) << 8) |
 		      (hex(record[5]) << 4) | hex(record[6]);
 
-	// Get the record type
+	/* Get the record type */
 	rec.type = (hex(record[7]) << 4) | hex(record[8]);
 	if (rec.type > IHEX_SLA) {
 		rec.result = BAD_RECORD;
 		return rec;
 	}
 
-	// Calculate checksum and copy data bytes
+	/* Calculate checksum and copy data bytes */
 	uint8_t checksum_c = rec.count + (rec.address >> 8) +
 			     (rec.address & 0xFF) + rec.type;
 	for (i = 0; i < rec.count; i++) {
@@ -119,7 +119,7 @@ static record_t parse_record(uint8_t *record)
 	return rec;
 }
 
-// Write a record
+/* Write a record */
 static int write_record(FILE *file, record_t *record)
 {
 	uint8_t checksum = record->count + (uint8_t)record->address +
@@ -137,7 +137,7 @@ static int write_record(FILE *file, record_t *record)
 	return EXIT_SUCCESS;
 }
 
-// Read an Intel hex file
+/* Read an Intel hex file */
 int read_hex_file(uint8_t *buffer, uint8_t *data, size_t *size)
 {
 	uint32_t line = 0, uba = 0;
@@ -146,7 +146,7 @@ int read_hex_file(uint8_t *buffer, uint8_t *data, size_t *size)
 
 	size_t chip_size = *size;
 	while (buffer) {
-		// Skip empty lines
+		/* Skip empty lines */
 		line++;
 		if (*buffer == '\r' || *buffer == '\n') {
 			buffer++;
@@ -176,14 +176,15 @@ int read_hex_file(uint8_t *buffer, uint8_t *data, size_t *size)
 			}
 			switch (rec.type) {
 			case IHEX_DATA:
-				// If file data size is bigger than chip size
-				// update the new size
+				/* If file data size is bigger than chip size
+				 * update the new size */
 				if (chip_size >= uba + rec.address + rec.count)
-					// copy record data
+					/* copy record data */
 					memcpy(&(data[uba + rec.address]),
 					       rec.data, rec.count);
-				//else
-				//*size = (uba + rec.address + rec.count);
+				/* else
+				 * *size = (uba + rec.address + rec.count);
+				 */
 				break;
 			case IHEX_EOF:
 				if (eof) {
@@ -194,22 +195,22 @@ int read_hex_file(uint8_t *buffer, uint8_t *data, size_t *size)
 				}
 				eof = 1;
 				break;
-				// Calculate the upper block address from a segment address
+				/* Calculate the upper block address from a segment address */
 			case IHEX_ESA:
 				uba = ((rec.data[0] << 12) |
 				       (rec.data[1] << 4));
 				break;
-				// Calculate the upper block address from an extended linear address
+				/* Calculate the upper block address from an extended linear address */
 			case IHEX_ELA:
 				uba = ((rec.data[0] << 24) | rec.data[1] << 16);
 				break;
-				// Load a segmented address
+				/* Load a segmented address */
 			case IHEX_SSA:
 				uba = ((rec.data[0] << 12) |
 				       (rec.data[1] << 4)) +
 				      ((rec.data[2] << 8) | rec.data[3]);
 				break;
-				// Load a linear address
+				/* Load a linear address */
 			case IHEX_SLA:
 				uba = ((rec.data[0] << 24) |
 				       (rec.data[1] << 16) |
@@ -231,7 +232,7 @@ int read_hex_file(uint8_t *buffer, uint8_t *data, size_t *size)
 	return INTEL_HEX_FORMAT;
 }
 
-// Write an Intel hex file
+/* Write an Intel hex file */
 int write_hex_file(FILE *file, uint8_t *data, uint16_t address, size_t size,
 		   int write_eof)
 {
@@ -239,7 +240,7 @@ int write_hex_file(FILE *file, uint8_t *data, uint16_t address, size_t size,
 	uint16_t uba = 0;
 	size_t len;
 
-	// if size > 64K insert an extended linear address record
+	/* if size > 64K insert an extended linear address record */
 	memset(rec.data, 0x00, sizeof(rec.data));
 	if (size > 65536) {
 		rec.type = IHEX_ELA;
@@ -249,7 +250,7 @@ int write_hex_file(FILE *file, uint8_t *data, uint16_t address, size_t size,
 	}
 
 	while (size) {
-		// Write data
+		/* Write data */
 		len = (size > ROW_SIZE ? ROW_SIZE : size);
 		rec.type = IHEX_DATA;
 		rec.count = len;
@@ -260,7 +261,7 @@ int write_hex_file(FILE *file, uint8_t *data, uint16_t address, size_t size,
 		size -= len;
 		address += ROW_SIZE;
 
-		// Insert an extended linear address record
+		/* Insert an extended linear address record */
 		if (!address && size) {
 			uba++;
 			rec.type = IHEX_ELA;
@@ -272,7 +273,7 @@ int write_hex_file(FILE *file, uint8_t *data, uint16_t address, size_t size,
 		}
 	}
 
-	// Insert EOF record if requested
+	/* Insert EOF record if requested */
 	if (write_eof) {
 		rec.type = IHEX_EOF;
 		rec.count = 0x00;

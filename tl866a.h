@@ -56,7 +56,7 @@
 #define TL866A_FIRMWARE_VERSION 0x0256
 #define TL866A_FIRMWARE_STRING	"03.2.86"
 
-// TL866A/CS low level functions.
+/* TL866A/CS low level functions. */
 int tl866a_begin_transaction(minipro_handle_t *handle);
 int tl866a_end_transaction(minipro_handle_t *handle);
 int tl866a_protect_off(minipro_handle_t *handle);

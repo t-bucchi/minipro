@@ -30,7 +30,7 @@
 #define MP_USBTIMEOUT	    5000
 #define MP_USB_READ_TIMEOUT 360000
 
-// Open usb device
+/* Open usb device */
 void *usb_open(uint8_t verbose)
 {
 	int ret = libusb_init(NULL);
@@ -44,12 +44,12 @@ void *usb_open(uint8_t verbose)
 	void *usb_handle = libusb_open_device_with_vid_pid(NULL, MP_TL866_VID,
 							   MP_TL866_PID);
 	if (usb_handle == NULL) {
-		// We didn't match the vid / pid of the "original" TL866 - so try the new
-		// TL866II+
+		/* We didn't match the vid / pid of the "original" TL866.
+		 * So try the new TL866II+ */
 		usb_handle = libusb_open_device_with_vid_pid(
 			NULL, MP_TL866II_VID, MP_TL866II_PID);
 
-		// If we don't get that either report error in connecting
+		/* If we don't get that either report error in connecting */
 		if (usb_handle == NULL) {
 			libusb_exit(NULL);
 			if (verbose)
@@ -70,7 +70,7 @@ void *usb_open(uint8_t verbose)
 	return usb_handle;
 }
 
-// Close usb device
+/* Close usb device */
 int usb_close(void *usb_handle)
 {
 	int ret = EXIT_SUCCESS;
@@ -85,7 +85,7 @@ int usb_close(void *usb_handle)
 	return ret;
 }
 
-// Get no. of devices connected
+/* Get no. of devices connected */
 int minipro_get_devices_count(uint8_t version)
 {
 	libusb_device **devs;
@@ -222,7 +222,8 @@ int write_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 	int status;
 	int bytes_transferred;
 
-	// If the payload length is exactly 64 bytes send it over the endpoint2 only
+	/* If the payload length is exactly 64 bytes send it over the
+	 * endpoint2 only */
 	if (!limit || length <= limit) {
 		status = msg_transfer(handle, buffer, length, LIBUSB_ENDPOINT_OUT,
 				    0x02, &bytes_transferred, MP_USBTIMEOUT);
@@ -233,7 +234,7 @@ int write_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 		return EXIT_FAILURE;
 	}
 
-	// This  is from XgPro
+	/* This  is from XgPro */
 	uint32_t j = length % 128;
 	if (length % 128) {
 		uint32_t k = (length - j) / 2;
@@ -255,12 +256,11 @@ int write_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 
 int read_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 {
-	/*
-   * If the payload length is less than 64 bytes increase the buffer to 64
-   * bytes and  read it over the endpoint2 only. Submitting a buffer less than
-   * 64 bytes will cause an libusb overflow.
-   */
-
+	/* If the payload length is less than 64 bytes increase the
+	 * buffer to 64 bytes and read it over the endpoint2 only.
+	 * Submitting a buffer less than 64 bytes will cause an libusb
+	 * overflow.
+	 */
 	int i, bytes_transferred;
 	if (length < 64) {
 		uint8_t data[64];
@@ -271,26 +271,26 @@ int read_payload2(void *handle, uint8_t *buffer, size_t length, size_t limit)
 		return EXIT_SUCCESS;
 	}
 
-	// If the payload length < limit bytes read it over the endpoint2 only
+	/* If the payload length < limit bytes read it over the endpoint2 only */
 	if (length == 64 || !limit || length < limit)
 		return msg_transfer(handle, buffer, length, LIBUSB_ENDPOINT_IN,
 				    0x02, &bytes_transferred, MP_USBTIMEOUT);
 
-	// More than limit bytes
+	/* More than limit bytes */
 	uint8_t *data = malloc(length);
 	if (!data) {
 		fprintf(stderr, "\nOut of memory\n");
 		return EXIT_FAILURE;
 	}
 
-	// Async read of endpoints 2 and 3
+	/* Async read of endpoints 2 and 3 */
 	if (payload_transfer(handle, LIBUSB_ENDPOINT_IN, data, length / 2,
 			     data + length / 2, length / 2)) {
 		free(data);
 		return EXIT_FAILURE;
 	}
 
-	// Deinterlacing the buffers
+	/* Deinterlacing the buffers */
 	size_t blocks = length / 64;
 	for (i = 0; i < blocks; ++i) {
 		uint8_t *ep_buf;

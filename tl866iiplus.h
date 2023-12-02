@@ -21,7 +21,7 @@
 #define TL866IIPLUS_FIRMWARE_VERSION 0x284
 #define TL866IIPLUS_FIRMWARE_STRING  "04.2.132"
 
-// TL866II+ low level functions.
+/* TL866II+ low level functions. */
 int tl866iiplus_begin_transaction(minipro_handle_t *handle);
 int tl866iiplus_end_transaction(minipro_handle_t *handle);
 int tl866iiplus_read_block(minipro_handle_t *handle, uint8_t type,

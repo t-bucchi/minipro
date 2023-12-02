@@ -21,7 +21,7 @@
 #define T48_FIRMWARE_VERSION 0x11c
 #define T48_FIRMWARE_STRING  "1.1.28"
 
-// T48 low level functions.
+/* T48 low level functions. */
 int t48_begin_transaction(minipro_handle_t *handle);
 int t48_end_transaction(minipro_handle_t *handle);
 int t48_read_block(minipro_handle_t *handle, uint8_t type,

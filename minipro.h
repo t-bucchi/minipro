@@ -36,11 +36,11 @@
 #define MP_FUSE_CFG			   0x01
 #define MP_FUSE_LOCK			   0x02
 
-// ICSP
+/* ICSP */
 #define MP_ICSP_ENABLE			   0x80
 #define MP_ICSP_VCC			   0x01
 
-// TSOP48
+/* TSOP48 */
 #define MP_TSOP48_TYPE_V3		   0x00
 #define MP_TSOP48_TYPE_NONE		   0x01
 #define MP_TSOP48_TYPE_V0		   0x02
@@ -53,7 +53,7 @@
 #define MP_ID_TYPE4			   0x04
 #define MP_ID_TYPE5			   0x05
 
-// Various
+/* Various */
 #define MP_LITTLE_ENDIAN		   0
 #define MP_BIG_ENDIAN			   1
 
@@ -69,29 +69,29 @@
 #define MP_LOGIC			   0x05
 #define MP_NAND				   0x06
 
-// voltage
-// for ATF20V10C and ATF16V8C variants
-// These flags are in voltages now (ex opts5)
+/* voltage
+ * for ATF20V10C and ATF16V8C variants
+ * These flags are in voltages now (ex opts5) */
 #define LAST_JEDEC_BIT_IS_POWERDOWN_ENABLE (0x1000)
 #define POWERDOWN_MODE_DISABLE		   (0x2000)
 #define ATF_IN_PAL_COMPAT_MODE		   (0x4000)
 
-// chip_info for PIC family
+/* chip_info for PIC family */
 #define PIC_INSTR_WORD_WIDTH_12		   0x84
 #define PIC_INSTR_WORD_WIDTH_14		   0x83
 #define PIC_INSTR_WORD_WIDTH_16_PIC18F	   0x82
 #define PIC_INSTR_WORD_WIDTH_16_PIC18J	   0x85
 
-// chip_info for Atmel MCU family
+/* chip_info for Atmel MCU family */
 #define ATMEL_AVR			   0x81
 #define ATMEL_C51			   0x87
 #define ATMEL_AT89			   0x88
 #define ATMEL_AT90			   0x86
 
-// Custom chip protocols
+/* Custom chip protocols */
 #define CP_PROM				   0x01
 
-// Adapters
+/* Adapters */
 #define TSOP48_ADAPTER			   0x00000001
 #define SOP44_ADAPTER			   0x00000002
 #define TSOP40_ADAPTER			   0x00000003
@@ -115,7 +115,7 @@ enum logic {
 	LOGIC_V
 };
 
-// Helper macros
+/* Helper macros */
 #define PIN_COUNT(x)	     (((x)&PIN_COUNT_MASK) >> 24)
 
 #define NAME_LEN	     40
@@ -172,12 +172,12 @@ typedef struct device {
 	uint32_t variant;
 	uint16_t read_buffer_size;
 	uint16_t write_buffer_size;
-	uint32_t code_memory_size; // Presenting for every device
+	uint32_t code_memory_size; /* Presenting for every device */
 	uint32_t data_memory_size;
 	uint32_t data_memory2_size;
 	uint32_t page_size;
-	uint32_t pages_per_block; // NAND only
-	uint32_t chip_id; // A vendor-specific chip ID (i.e. 0x1E9502 for ATMEGA48)
+	uint32_t pages_per_block; /* NAND only */
+	uint32_t chip_id; /* A vendor-specific chip ID (i.e. 0x1E9502 for ATMEGA48) */
 	uint8_t chip_id_bytes_count;
 	voltages_t voltages;
 	uint32_t pulse_delay;
@@ -187,8 +187,8 @@ typedef struct device {
 	uint16_t compare_mask;
 	uint16_t blank_value;
 	package_details_t
-		package_details; // pins count or image ID for some devices
-	void *config; // Configuration bytes that's presenting in some architectures
+		package_details; /* pins count or image ID for some devices */
+	void *config; /* Configuration bytes that's presenting in some architectures */
 	uint8_t vector_count;
 	uint8_t *vectors;
 } device_t;
@@ -300,11 +300,11 @@ typedef struct minipro_handle {
 	int (*minipro_set_voltages)(struct minipro_handle *, uint8_t, uint8_t);
 } minipro_handle_t;
 
-// These are old byte_utils functions
+/* These are old byte_utils functions */
 void format_int(uint8_t *out, uint32_t in, size_t size, uint8_t endianness);
 uint32_t load_int(uint8_t *buffer, size_t size, uint8_t endianness);
 
-// Helper functions
+/* Helper functions */
 void minipro_print_system_info(minipro_handle_t *handle);
 uint32_t crc32(uint8_t *data, size_t size, uint32_t initial);
 int minipro_reset(minipro_handle_t *handle);
