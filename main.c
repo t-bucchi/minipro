@@ -203,7 +203,7 @@ int get_programmer_version(uint8_t *version)
 
 void print_supported_programmers_and_exit()
 {
-	fprintf(stderr, "tl866a: TL866CS/A\ntl866ii: TL866II+\nt48: T48\n");
+	fprintf(stderr, "tl866a: TL866CS/A\ntl866ii: TL866II+\nt48: T48  (experimental)\n");
 	exit(EXIT_SUCCESS);
 }
 
