@@ -1850,7 +1850,7 @@ int read_fuses(minipro_handle_t *handle, fuse_decl_t *fuses)
 	/* Read fuses section if requested */
 	if (fuses->num_fuses && (!filter || cmdopts->filter_fuses)) {
 		gettimeofday(&begin, NULL);
-		uint8_t items = handle->device->flags.word_size == 2 ? 1 : 2;
+		uint8_t items = fuses->num_fuses;
 
 		if (minipro_read_fuses(handle, MP_FUSE_CFG,
 				       fuses->num_fuses *
@@ -1984,7 +1984,7 @@ int write_fuses(minipro_handle_t *handle, fuse_decl_t *fuses)
 		fprintf(stderr, "Writing fuses... ");
 		fflush(stderr);
 
-		uint8_t items = handle->device->flags.word_size == 2 ? 1 : 2;
+		uint8_t items = fuses->num_fuses;
 		for (i = 0; i < fuses->num_fuses; i++) {
 			if (get_config_value(config, fuses->fuse[i].name,
 					     &value) == EXIT_FAILURE) {
@@ -2188,7 +2188,7 @@ int verify_fuses(minipro_handle_t *handle, fuse_decl_t *fuses)
 
 	/* Verify/Blank check fuses section if requested */
 	if (fuses->num_fuses && (!filter || section->filter_fuses)) {
-		uint8_t items = handle->device->flags.word_size == 2 ? 1 : 2;
+		uint8_t items = fuses->num_fuses;
 		for (i = 0; i < fuses->num_fuses; i++) {
 			value = fuses->fuse[i].def;
 			if (handle->cmdopts->filename &&
