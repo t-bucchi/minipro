@@ -361,9 +361,9 @@ int minipro_begin_transaction(minipro_handle_t *handle)
 
 	/* pack voltages */
 	voltages_t *voltages = &handle->device->voltages;
-	voltages->raw_voltages = (voltages->raw_voltages & 0xffff000f) |
+	voltages->raw_voltages = (voltages->raw_voltages & 0xffff0000) |
 				 (voltages->vdd << 12) | (voltages->vcc << 8) |
-				 (voltages->vpp << 4);
+				 voltages->vpp;
 	if (handle->minipro_begin_transaction) {
 		return handle->minipro_begin_transaction(handle);
 	} else {

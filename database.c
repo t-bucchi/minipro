@@ -369,7 +369,7 @@ static int load_mem_device(db_data_t *db_data, const uint8_t *xml_device,
 	device->voltages.raw_voltages = voltages;
 	device->voltages.vdd = (voltages >> 12) & 0x0f;
 	device->voltages.vcc = (voltages >> 8) & 0x0f;
-	device->voltages.vpp = (voltages >> 4) & 0x0f;
+	device->voltages.vpp = voltages & 0xff;
 
 	/* Unpacking package details */
 	device->package_details.pin_count =

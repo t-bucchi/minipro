@@ -59,23 +59,36 @@ static const char *user_id[] = {
 static struct voltage_s {
 	const char *name;
 	uint8_t value;
-} tl866a_vpp_voltages[] = { { "10", 0x04 }, { "12.5", 0x00 }, { "13.5", 0x03 },
-			    { "14", 0x05 }, { "16", 0x01 },   { "17", 0x07 },
-			    { "18", 0x06 }, { "21", 0x02 },   { NULL, 0x00 } },
+} tl866a_vpp_voltages[] = { { "10", 0x40 }, { "12.5", 0x00 }, { "13.5", 0x30 },
+			    { "14", 0x50 }, { "16", 0x10 },   { "17", 0x70 },
+			    { "18", 0x60 }, { "21", 0x20 },   { NULL, 0x00 } },
   tl866a_vcc_voltages[] = { { "3.3", 0x02 }, { "4", 0x01 },   { "4.5", 0x05 },
 			    { "5", 0x00 },   { "5.5", 0x04 }, { "6.5", 0x03 },
 			    { NULL, 0x00 } },
-  tl866ii_vpp_voltages[] = { { "9", 0x01 },    { "9.5", 0x02 },
-			     { "10", 0x03 },   { "11", 0x04 },
-			     { "11.5", 0x05 }, { "12", 0x00 },
-			     { "12.5", 0x06 }, { "13", 0x07 },
-			     { "13.5", 0x08 }, { "14", 0x09 },
-			     { "14.5", 0x0a }, { "15.5", 0x0b },
-			     { "16", 0x0c },   { "16.5", 0x0d },
-			     { "17", 0x0e },   { "18", 0x0f },
+  tl866ii_vpp_voltages[] = { { "9", 0x10 },    { "9.5", 0x20 },
+			     { "10", 0x30 },   { "11", 0x40 },
+			     { "11.5", 0x50 }, { "12", 0x00 },
+			     { "12.5", 0x60 }, { "13", 0x70 },
+			     { "13.5", 0x80 }, { "14", 0x90 },
+			     { "14.5", 0xa0 }, { "15.5", 0xb0 },
+			     { "16", 0xc0 },   { "16.5", 0xd0 },
+			     { "17", 0xe0 },   { "18", 0xf0 },
 			     { NULL, 0x00 } },
   tl866ii_vcc_voltages[] = { { "3.3", 0x01 }, { "4", 0x02 },   { "4.5", 0x03 },
 			     { "5", 0x00 },   { "5.5", 0x04 }, { "6.5", 0x05 },
+			     { NULL, 0x00 } },
+  t48_vcc_voltages[] = { { "3.3", 0x01 }, { "4", 0x02 },   { "4.5", 0x03 },
+			     { "5", 0x00 },   { "5.5", 0x04 }, { "6.5", 0x05 },
+			     { NULL, 0x00 } },
+  t48_vpp_voltages[] = { { "9", 0x10 },    { "9.5", 0x20 },
+			     { "10", 0x30 },   { "11", 0x40 },
+			     { "11.5", 0x50 }, { "12", 0x00 },
+			     { "12.5", 0x60 }, { "13", 0x70 },
+			     { "13.5", 0x80 }, { "14", 0x90 },
+			     { "14.5", 0xa0 }, { "15.5", 0xb0 },
+			     { "16", 0xc0 },   { "16.5", 0xd0 },
+			     { "17", 0xe0 },   { "18", 0xf0 },
+			     { "21", 0xf2 },   { "25", 0xf1 },
 			     { NULL, 0x00 } },
   logic_voltages[] = { { "5", 0x00 },
 		       { "3.3", 0x01 },
@@ -281,19 +294,53 @@ void print_devices_and_exit(cmdopts_t *cmdopts)
 	exit(EXIT_SUCCESS);
 }
 
+static struct voltage_s *get_vpp_voltages(minipro_handle_t *handle)
+{
+	switch (handle->version) {
+	case MP_TL866A:
+	case MP_TL866CS:
+		return tl866a_vpp_voltages;
+		break;
+	case MP_TL866IIPLUS:
+		return tl866ii_vpp_voltages;
+		break;
+	case MP_T48:
+		return t48_vpp_voltages;
+		break;
+	}
+	return NULL;
+}
+
+static struct voltage_s *get_vcc_voltages(minipro_handle_t *handle)
+{
+	switch (handle->version) {
+	case MP_TL866A:
+	case MP_TL866CS:
+		return tl866a_vcc_voltages;
+		break;
+	case MP_TL866IIPLUS:
+		return tl866ii_vcc_voltages;
+		break;
+	case MP_T48:
+		return t48_vcc_voltages;
+		break;
+	}
+	return NULL;
+}
+
 /* Get a voltage string from an integer */
 const char *get_voltage(minipro_handle_t *handle, uint8_t value, uint8_t type)
 {
-	struct voltage_s *vpp_voltages = (handle->version == MP_TL866IIPLUS ?
-						  tl866ii_vpp_voltages :
-						  tl866a_vpp_voltages);
-	struct voltage_s *vcc_voltages = (handle->version == MP_TL866IIPLUS ?
-						  tl866ii_vcc_voltages :
-						  tl866a_vcc_voltages);
-	struct voltage_s *voltage = (type == VPP_VOLTAGE ? vpp_voltages :
-				     handle->device->chip_type == MP_LOGIC ?
-							   logic_voltages :
-							   vcc_voltages);
+	struct voltage_s *voltage = NULL;
+
+	if (type == VPP_VOLTAGE) {
+		voltage = get_vpp_voltages(handle);
+	} else if (handle->device->chip_type == MP_LOGIC) {
+		voltage = logic_voltages;
+	} else {
+		voltage = get_vcc_voltages(handle);
+	}
+
 	while (voltage->name) {
 		if (voltage->value == value) {
 			return voltage->name;
@@ -307,16 +354,15 @@ const char *get_voltage(minipro_handle_t *handle, uint8_t value, uint8_t type)
 int set_voltage(minipro_handle_t *handle, char *value, uint8_t *target,
 		uint8_t type)
 {
-	struct voltage_s *vpp_voltages = (handle->version == MP_TL866IIPLUS ?
-						  tl866ii_vpp_voltages :
-						  tl866a_vpp_voltages);
-	struct voltage_s *vcc_voltages = (handle->version == MP_TL866IIPLUS ?
-						  tl866ii_vcc_voltages :
-						  tl866a_vcc_voltages);
-	struct voltage_s *voltage = (type == VPP_VOLTAGE ? vpp_voltages :
-				     handle->device->chip_type == MP_LOGIC ?
-							   logic_voltages :
-							   vcc_voltages);
+	struct voltage_s *voltage = NULL;
+
+	if (type == VPP_VOLTAGE) {
+		voltage = get_vpp_voltages(handle);
+	} else if (handle->device->chip_type == MP_LOGIC) {
+		voltage = logic_voltages;
+	} else {
+		voltage = get_vcc_voltages(handle);
+	}
 	while (voltage->name) {
 		if (!strcasecmp(voltage->name, value)) {
 			*target = voltage->value;
