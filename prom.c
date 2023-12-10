@@ -232,7 +232,7 @@ int mask_prom_init(minipro_handle_t *handle)
 int prom_init(minipro_handle_t *handle)
 {
 	uint8_t type = (uint8_t)handle->device->variant;
-	if (type && HITACHI_MASK_PROM_MASK)
+	if (type & HITACHI_MASK_PROM_MASK)
 	  return mask_prom_init(handle);
 
 	size_t prom_entries = sizeof(prom_table) / sizeof(prom_table[0]);
