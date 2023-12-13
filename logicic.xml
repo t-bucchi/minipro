@@ -3097,6 +3097,37 @@
         <vector id="15"> 1 1 1 1 Z 1 Z 1 </vector>
       </ic>
     </manufacturer>
+    <manufacturer name="Commodore">
+      <ic name="906114" type="5" voltage="5V" pins="28">
+        <!-- A C64 glue logic array. -->
+        <!-- Converted from https://raw.githubusercontent.com/ktelep/C64_PLA_Logic_Test_Xgpro/main/C64_PLA_Test.lgc -->
+        <vector id="00"> X X X X X X X X X L X X X G X X X H 0 1 1 0 1 X 1 X X V </vector>
+        <vector id="01"> X 1 1 1 X X X X X L X X X G X X X H 0 X X 0 1 X 0 X X V </vector>
+        <vector id="02"> X 1 0 1 X X 1 X X L X X X G X X X H 0 X X 0 0 1 0 X X V </vector>
+        <vector id="03"> X 0 0 1 X X X X X H L X X G X X X H 0 X X 0 1 X 0 X X V </vector>
+        <vector id="04"> X 0 0 1 X X 1 1 X H L X X G X X X H 0 X X X 0 1 0 X X V </vector>
+        <vector id="05"> X 0 1 1 X 1 1 X X H H L X G X X X H 0 X X X X 0 0 X 1 V </vector>
+        <vector id="06"> X 0 1 1 X X X X X H H L X G X X X H 0 X X 0 1 0 0 X 1 V </vector>
+        <vector id="07"> X 0 1 1 X 1 0 1 X H H L X G X X X H 0 X X X X 0 0 X 1 V </vector>
+        <vector id="08"> X 0 1 1 X 1 1 X X H H L X G X X X H 0 X X X X 1 0 1 1 V </vector>
+        <vector id="09"> X 0 1 1 X X X X X H H L X G X X X H 0 X X 0 1 1 0 1 1 V </vector>
+        <vector id="10"> X 0 1 1 X 1 0 1 X H H L X G X X X H 0 X X X X 1 0 1 1 V </vector>
+        <vector id="11"> X 0 1 1 X X X X 0 X X X L G X X X X 0 X X X X 0 0 X 1 V </vector>
+        <vector id="12"> X X X X 1 X X X X X X X X G L X X H 0 1 0 X 0 X 1 X X V </vector>
+        <vector id="13"> X X X X 1 X X X X X X X X G L X X H 0 1 0 1 1 X 1 X X V </vector>
+        <vector id="14"> X 0 1 1 X 0 1 X X X X X X G L X X H 0 X X 1 X 1 0 X 1 V </vector>
+        <vector id="15"> X 0 1 1 X 0 0 1 X X X X X G L X X H 0 X X 1 X 1 0 X 1 V </vector>
+        <vector id="16"> X 0 1 1 X 0 1 X X X X X X G L X X H 0 X X 0 0 1 0 X 1 V </vector>
+        <vector id="17"> X 1 1 1 X X 1 X X X X X X G X L X H 0 X X 1 X 1 0 X X V </vector>
+        <vector id="18"> X 1 1 1 X X 1 X X X X X X G X L X H 0 X X 0 0 1 0 X X V </vector>
+        <vector id="19"> X 1 0 1 X X 1 1 X X X X X G X X L H 0 X X 1 X 1 0 X X V </vector>
+        <vector id="20"> X X X X X X X X 1 X X X X G X X X H 0 X X X X X X X X V </vector>
+        <vector id="21"> X X 1 0 X X X X 0 X X X X G X X X H 0 X X 0 1 X X X X V </vector>
+        <vector id="22"> X 1 0 X X X X X 0 X X X X G X X X H 0 X X 0 1 X X X X V </vector>
+        <vector id="23"> X 0 0 0 X X X X 0 X X X X G X X X H 0 X X 0 1 X X X 1 V </vector>
+        <vector id="24"> X 0 1 1 X X X X 0 X X X X G X X X H 0 X X 0 1 X X X 0 V </vector>
+      </ic>
+    </manufacturer>
     <custom name="Logic Ic">
       <ic name="40104" type="5" voltage="5V" pins="16">
         <vector id="00"> 1 1 0 0 0 0 0 G 0 0 C L L L L V </vector>
