@@ -225,6 +225,8 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		handle->minipro_spi_autodetect = t48_spi_autodetect;
 		handle->minipro_read_block = t48_read_block;
 		handle->minipro_write_block = t48_write_block;
+		handle->minipro_protect_off = t48_protect_off;
+		handle->minipro_protect_on = t48_protect_on;
 		handle->minipro_erase = t48_erase;
 		handle->minipro_read_fuses = t48_read_fuses;
 		handle->minipro_write_fuses = t48_write_fuses;

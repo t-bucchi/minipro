@@ -38,6 +38,8 @@ int t48_read_fuses(minipro_handle_t *handle, uint8_t type, size_t size,
 			   uint8_t items_count, uint8_t *buffer);
 int t48_write_fuses(minipro_handle_t *handle, uint8_t type, size_t size,
 			    uint8_t items_count, uint8_t *buffer);
+int t48_protect_off(minipro_handle_t *handle);
+int t48_protect_on(minipro_handle_t *handle);
 int t48_erase(minipro_handle_t *handle);
 
 #endif
