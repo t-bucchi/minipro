@@ -372,6 +372,22 @@ int t48_erase(minipro_handle_t *handle)
 	return msg_recv(handle->usb_handle, msg, sizeof(msg));
 }
 
+int t48_protect_off(minipro_handle_t *handle)
+{
+	uint8_t msg[8];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_PROTECT_OFF;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+int t48_protect_on(minipro_handle_t *handle)
+{
+	uint8_t msg[8];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_PROTECT_ON;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
 int t48_get_ovc_status(minipro_handle_t *handle,
 			       minipro_status_t *status, uint8_t *ovc)
 {
