@@ -307,8 +307,8 @@ int prom_read_mask_prom(minipro_handle_t *handle, uint32_t address,
 	static uint8_t zif[40];
 	uint8_t type = (uint8_t)handle->device->variant & ~HITACHI_MASK_PROM_MASK;
 	uint8_t pin_count = handle->device->package_details.pin_count;
-	uint8_t ce_pin_count = strlen(mask_prom_table[type].ce_pins);
-	uint8_t cs_pin_count = strlen(mask_prom_table[type].cs_pins);
+	uint8_t ce_pin_count = strlen((const char *) mask_prom_table[type].ce_pins);
+	uint8_t cs_pin_count = strlen((const char *) mask_prom_table[type].cs_pins);
 
 	/* Set data bus direction to input with pull-up resistors */
 	set_io_pins(zif_dir, mask_prom_table[type].data_bus_pins,
