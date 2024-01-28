@@ -173,7 +173,7 @@ static uint8_t zif_state[40];
 static pin_driver_t pin_drivers[40];
 
 /* Set the initial state */
-int mask_prom_init(minipro_handle_t *handle)
+static int mask_prom_init(minipro_handle_t *handle)
 {
 	uint8_t type = (uint8_t)handle->device->variant & ~HITACHI_MASK_PROM_MASK;
 	size_t prom_entries = sizeof(mask_prom_table) / sizeof(mask_prom_table[0]);
@@ -294,7 +294,7 @@ int prom_terminate(minipro_handle_t *handle)
 }
 
 /* Helper function for prom_read - checks whether buffer is empty */
-int is_empty(uint8_t *buffer, size_t length)
+static int is_empty(uint8_t *buffer, size_t length)
 {
 	for (size_t cur = 0; cur < length; cur++)
 		if(buffer[cur] != 0xFF) return 0;
@@ -302,7 +302,7 @@ int is_empty(uint8_t *buffer, size_t length)
 }
 
 /* Read bytes from Hitachi mask PROMs */
-int prom_read_mask_prom(minipro_handle_t *handle, uint32_t address,
+static int prom_read_mask_prom(minipro_handle_t *handle, uint32_t address,
 	                uint8_t *buffer, size_t length) {
 	static uint8_t zif[40];
 	uint8_t type = (uint8_t)handle->device->variant & ~HITACHI_MASK_PROM_MASK;
