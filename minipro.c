@@ -327,7 +327,7 @@ void minipro_print_system_info(minipro_handle_t *handle)
 	}
 
 	if (handle->status == MP_STATUS_BOOTLOADER) {
-		fprintf(stderr, "Found %s ", handle->model);
+		fprintf(stderr, "Found %s in bootloader mode", handle->model);
 		return;
 	}
 

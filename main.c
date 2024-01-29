@@ -147,11 +147,6 @@ void print_version_and_exit(cmdopts_t *cmdopts)
 	minipro_handle_t *handle = minipro_open(VERBOSE);
 	if (handle) {
 		minipro_print_system_info(handle);
-		fprintf(stderr, "Device code: %s\nSerial code: %s\n",
-			handle->device_code, handle->serial_number);
-		if (handle->status == MP_STATUS_BOOTLOADER) {
-			fprintf(stderr, "in bootloader mode!\n");
-		}
 		minipro_close(handle);
 	}
 
