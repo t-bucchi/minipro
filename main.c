@@ -141,9 +141,11 @@ static struct option long_options[] = {
 	{ NULL, 0, NULL, 0 }
 };
 
+static char signon[] = "minipro version %s     A free and open TL866 series programmer\n";
+
 void print_version_and_exit(cmdopts_t *cmdopts)
 {
-	fprintf(stderr, "Supported programmers: TL866A/CS, TL866II+\n");
+	fprintf(stderr, "Supported programmers: TL866A/CS, TL866II+, T48 (experimental)\n");
 	minipro_handle_t *handle = minipro_open(VERBOSE);
 	if (handle) {
 		minipro_print_system_info(handle);
@@ -151,11 +153,11 @@ void print_version_and_exit(cmdopts_t *cmdopts)
 	}
 
 	char output[] =
-		"minipro version %s     A free and open TL866XX programmer\n"
 		"Commit date:\t%s\n"
 		"Git commit:\t%s\n"
 		"Git branch:\t%s\n";
-	fprintf(stderr, output, VERSION, GIT_DATE, GIT_HASH, GIT_BRANCH);
+	fprintf(stderr, signon, VERSION);
+	fprintf(stderr, output, GIT_DATE, GIT_HASH, GIT_BRANCH);
 	db_data_t db_data;
 	memset(&db_data, 0, sizeof(db_data));
 	db_data.logicic_path = cmdopts->logicic_path;
@@ -166,11 +168,13 @@ void print_version_and_exit(cmdopts_t *cmdopts)
 /* Add usage information to the manpage in man/minipro.1, not here. */
 void print_help_and_exit(char *progname)
 {
+	char *myname;
 	char usage[] =
-		"minipro version %s     A free and open TL866XX programmer\n"
 		"Usage: %s [options]\n"
-		"See the manual page (type \"man minipro\" for documentation)\n\n";
-	fprintf(stderr, usage, VERSION, basename(progname));
+		"See the manual page (type \"man %s\" for documentation)\n\n";
+	myname = basename(progname);
+	fprintf(stderr, signon, VERSION);
+	fprintf(stderr, usage, myname, myname);
 	exit(EXIT_FAILURE);
 }
 
