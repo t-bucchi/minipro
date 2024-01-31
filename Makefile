@@ -5,9 +5,9 @@ CC=gcc
 #CC=clang
 
 # Compiler options
-CFLAGS = -g -O0 -Wall -Wextra -W -Wno-sign-compare -Wno-unused-parameter
-CPPFLAGS = -DSHARE_INSTDIR="\"$(SHARE_INSTDIR)\""
-LDFLAGS =
+CFLAGS ?= -g -O0 -Wall -Wextra -W -Wno-sign-compare -Wno-unused-parameter
+CPPFLAGS += -DSHARE_INSTDIR="\"$(SHARE_INSTDIR)\""
+LDFLAGS ?=
 
 # Normally minipro is installed to /usr/local.  If you want to put it
 # somewhere else, define that location here.
@@ -66,7 +66,7 @@ MINIPRO=minipro
 INFOIC=infoic.xml
 LOGICIC=logicic.xml
 TESTS=$(wildcard tests/test_*.c);
-OBJCOPY=objcopy
+OBJCOPY?=objcopy
 
 DIST_DIR = $(MINIPRO)-$(VERSION)
 BIN_INSTDIR=$(DESTDIR)$(PREFIX)/bin
