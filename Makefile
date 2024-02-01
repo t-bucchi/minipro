@@ -58,7 +58,7 @@ else
 endif
 
 COMMON_OBJECTS=xml.o jedec.o ihex.o srec.o database.o bitbang.o prom.o \
-               minipro.o tl866a.o tl866iiplus.o t48.o version.o $(USB)
+               minipro.o tl866a.o tl866iiplus.o t48.o t56.o version.o $(USB)
 OBJECTS=$(COMMON_OBJECTS) main.o
 PROGS=minipro
 STATIC_LIB=libminipro.a

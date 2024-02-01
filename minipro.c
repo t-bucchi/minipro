@@ -27,6 +27,7 @@
 #include "tl866a.h"
 #include "tl866iiplus.h"
 #include "t48.h"
+#include "t56.h"
 #include "usb.h"
 
 #define TL866A_RESET	  0xFF
@@ -105,6 +106,13 @@ static int minipro_get_system_info(minipro_handle_t *handle)
 		memcpy(handle->serial_number, msg + 32, 24);
 		hw = msg[60]; /* TODO: confirm that it's HW */
 		break;
+	case MP_T56:
+		handle->status = MP_STATUS_NORMAL; /* TODO: */
+		handle->model = "T56";
+		memcpy(handle->device_code, msg + 24, 8);
+		memcpy(handle->serial_number, msg + 32, 24);
+		hw = msg[60]; /* TODO: confirm that it's HW */
+		break;
 	default:
 		return EXIT_SUCCESS;
 	}
@@ -139,6 +147,7 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 	case MP_TL866CS:
 	case MP_TL866IIPLUS:
 	case MP_T48:
+	case MP_T56:
 		switch (handle->status) {
 		case MP_STATUS_NORMAL:
 		case MP_STATUS_BOOTLOADER:
@@ -324,6 +333,10 @@ void minipro_print_system_info(minipro_handle_t *handle)
 		expected_firmware = T48_FIRMWARE_VERSION;
 		expected_firmware_str = T48_FIRMWARE_STRING;
 		break;
+	case MP_T56:
+		expected_firmware = T56_FIRMWARE_VERSION;
+		expected_firmware_str = T56_FIRMWARE_STRING;
+		break;
 	}
 
 	if (handle->status == MP_STATUS_BOOTLOADER) {
@@ -336,6 +349,10 @@ void minipro_print_system_info(minipro_handle_t *handle)
 
 	if (handle->version == MP_T48) {
 		fprintf(stderr, "Warning: T48 support is experimental!\n");
+	}
+
+	if (handle->version == MP_T56) {
+		fprintf(stderr, "Warning: T56 support is extremely experimental!\n");
 	}
 
 	if (handle->firmware < expected_firmware) {
