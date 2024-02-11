@@ -48,7 +48,8 @@ to detect if a chip is inserted at all when using the -y option.
 
 .TP
 .B \-r, \--read <filename>
-Read from the device and write the contents to this file.
+Read from the device and write the contents to this file.  See NOTES ON
+MEMORY TYPES below.
 
 .TP
 .B \-w, \--write <filename>
@@ -71,11 +72,12 @@ or
 .B encryption table
 on some devices like Atmel AT89S8253.  Use
 .B -c user
-to read or write this page.
+to read or write this page.  See NOTES ON MEMORY TYPES below.
 
 .TP
 .B \-f, --format <format>
-Specify file format.  Possible values: ihex, srec.
+Specify file format.  Possible values: ihex, srec.  See NOTES ON FILE
+FORMATS below.
 
 .TP
 .B \-b, --blank_check
@@ -261,6 +263,32 @@ Use
 to view if those options are supported.
 
 
+.SH NOTES ON FILE FORMATS
+
+If the
+.B \-f
+or
+.B \--format
+options are not used when reading, the resulting file will be saved as a
+raw binary file.
+
+If the ihex format is chosen and the data size is 64 kilobytes or
+smaller, the file will be saved in ihex8 format.  Just plain hex records
+are used -- no segment/linear address records are inserted.
+
+If the data size exceeds 64 kilobytes, then the ihex32 format is used.
+The ihex16 format is not used when reading chips.  The same strategy is
+used for the Motorola srecord format.
+
+When writing chips, the format is automatically detected.  It is
+therefore not necessary to use the
+.B \-f
+or
+.B \--format
+options.  The exact Intel hex format (ihex8, ihex16, or ihex32) are also
+automatically detected.
+
+
 .SH UPDATING FIRMWARE
 Firmware update files can be obtained from the manufacturer's website:
 http://www.autoelectric.cn.
@@ -272,32 +300,15 @@ For the TL866A/CS, use the "update.dat" file.
 .br
 For the TL866IOI+, use the "updateII.dat" file.
 
-==== EDIT LINE ====
-
-
-When writing chips, this is not necessary because the file format is
-automatically detected.  There is no need to specify the exact Intex hex
-format (ihex8, ihex16, or ihex32) as the format is automatically
-detected.  If this option is not used, then the file will be saved as a
-raw binary file.
-
-When reading chips and the ihex format is chosen, if the data size is up
-to 64Kb the file will be saved in ihex8 format. Just plain hex records
-are used -- no segment/linear address records are inserted.  If the data
-size exceeds 64Kb then the ihex32 format is used. The ihex16 format is
-not used when reading chips.  The same strategy is used for the Motorola
-srecord format.
-
 .TP
 .B \-F <filename>
-Update firmware (should be update.dat).
+Update firmware.
+.B minipro
+will verify the firmware file and ask if you wish to proceed with
+writing the file to the programmer.
 
-.TP
-.B \-h
-Show help and quit.
 
-.SH NOTES
-
+.SH NOTES ON MEMORY TYPES
 If
 .B -c
 is omitted and
@@ -358,8 +369,16 @@ format looks like.
 
 .SH EXAMPLES
 
-.IP "\fBminipro -p 7404 -T\fR" 4
+.B minipro -p 7404 -T
+.br
 Check whether a 74(LS/HC/...)04 hex NOT gate chip.
+
+.B minipro -p "AT29C256@DIP28" -w foobar.bin
+.br
+Write the contents of
+.B foobar.bin
+to an AT29C256 256 kilobit (32-kilobytes) electrically-erasable Flash EPROM.
+
 
 .SH AUTHOR
 .I minipro
