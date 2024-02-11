@@ -241,6 +241,12 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		handle->minipro_write_fuses = t48_write_fuses;
 		handle->minipro_get_ovc_status = t48_get_ovc_status;
 		break;
+	case MP_T56:
+		handle->minipro_begin_transaction = t56_begin_transaction;
+		handle->minipro_end_transaction = t56_end_transaction;
+		handle->minipro_get_chip_id = t56_get_chip_id;
+		handle->minipro_get_ovc_status = t56_get_ovc_status;
+		break;
 	}
 	return handle;
 }

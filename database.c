@@ -1241,7 +1241,7 @@ device_t *get_device_by_name(db_data_t *db_data)
 	if (db_data->version == MP_TL866CS)
 		db_data->version = MP_TL866A;
 
-	if (db_data->version == MP_T48)
+	if (db_data->version == MP_T48 || db_data->version == MP_T56)
 		db_data->version = MP_TL866IIPLUS;
 
 	/* Initialize state machine structure */
