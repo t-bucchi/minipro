@@ -151,8 +151,8 @@ Enable protection after programming.
 Do NOT verify after write.
 
 .TP
-.B \-p, --device
-Specify device (use quotes).
+.B \-p, --device <device>
+Specify device (use quotes to avoid mangling by the shell).
 
 .TP
 .B \-T, --logic_test
@@ -349,7 +349,7 @@ from ihex to binary).
 
 You can also read a chip and write the data to the stdout like this:
 
-minipro -p w49f002u -r- -f ihex.
+.B minipro -p w49f002u -r- -f ihex.
 
 You can then pass the output to another command line tool with | for
 other processing, etc.
@@ -373,11 +373,13 @@ format looks like.
 .br
 Check whether a 74(LS/HC/...)04 hex NOT gate chip.
 
-.B minipro -p "AT29C256@DIP28" -w foobar.bin
+.B minipro -p \fB"AT29C256@DIP28\fR" -w foobar.bin
 .br
 Write the contents of
 .B foobar.bin
-to an AT29C256 256 kilobit (32-kilobytes) electrically-erasable Flash EPROM.
+to an AT29C256 256 kilobit (32-kilobytes) electrically-erasable Flash
+EPROM.  Remember to put single or double quotes around the device name
+to prevent the shell from interpreting the \fB"@\fR" (at sign).
 
 
 .SH AUTHOR
