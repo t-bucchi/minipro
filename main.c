@@ -2641,7 +2641,7 @@ int action_write(minipro_handle_t *handle)
 				free(rjedec.fuses);
 				return EXIT_FAILURE;
 			}
-			ret = compare_memory(0x00, wjedec.fuses, rjedec.fuses,
+			ret = compare_memory(0x01, wjedec.fuses, rjedec.fuses,
 					     wjedec.QF, rjedec.QF, &address,
 					     &c1, &c2);
 
@@ -2790,7 +2790,7 @@ int action_verify(minipro_handle_t *handle)
 		uint8_t c1, c2;
 		uint32_t address;
 
-		if (compare_memory(0x00, wjedec.fuses, rjedec.fuses, wjedec.QF,
+		if (compare_memory(0x01, wjedec.fuses, rjedec.fuses, wjedec.QF,
 				   rjedec.QF, &address, &c1, &c2)) {
 			if (handle->cmdopts->filename) {
 				fprintf(stderr,
