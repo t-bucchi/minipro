@@ -240,6 +240,7 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		handle->minipro_read_fuses = t48_read_fuses;
 		handle->minipro_write_fuses = t48_write_fuses;
 		handle->minipro_get_ovc_status = t48_get_ovc_status;
+		handle->minipro_logic_ic_test = t48_logic_ic_test;
 		break;
 	case MP_T56:
 		handle->minipro_begin_transaction = t56_begin_transaction;
