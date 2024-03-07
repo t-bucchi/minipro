@@ -474,7 +474,7 @@ int tl866iiplus_get_chip_id(minipro_handle_t *handle, uint8_t *type,
 int tl866iiplus_spi_autodetect(minipro_handle_t *handle, uint8_t type,
 			       uint32_t *device_id)
 {
-	if (handle->device->flags.custom_protocol) {
+	if (handle->device != NULL && handle->device->flags.custom_protocol) {
 		return bb_spi_autodetect(handle, type, device_id);
 	}
 	uint8_t msg[64];
