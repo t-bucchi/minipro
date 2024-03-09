@@ -218,7 +218,11 @@ int get_programmer_version(uint8_t *version)
 
 void print_supported_programmers_and_exit()
 {
-	fprintf(stderr, "tl866a: TL866CS/A\ntl866ii: TL866II+\nt48: T48  (experimental)\n");
+	fprintf(stderr, "tl866a:  TL866CS/A\n"
+			"tl866ii: TL866II+\n"
+			"t48:     T48  (experimental)\n"
+			"t56:     T56  (very experimental)\n"
+			);
 	exit(EXIT_SUCCESS);
 }
 
@@ -742,6 +746,10 @@ void parse_cmdline(int argc, char **argv, cmdopts_t *cmdopts)
 				cmdopts->version = MP_TL866A;
 			else if (!strcasecmp(optarg, "tl866ii"))
 				cmdopts->version = MP_TL866IIPLUS;
+			else if (!strcasecmp(optarg, "t48"))
+				cmdopts->version = MP_T48;
+			else if (!strcasecmp(optarg, "t56"))
+				cmdopts->version = MP_T56;
 			else {
 				fprintf(stderr,
 					"Unknown programmer version (%s).\n",
