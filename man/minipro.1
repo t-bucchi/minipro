@@ -1,14 +1,19 @@
 .TH MINIPRO 1 "17 September 2022 (v0.6)"
 .SH NAME
-minipro \- A free and open TL866XX programmer.
+minipro \- A free and open command-line program for controlling chip
+programmers by Autoelectric / Xgecu.
 
 .SH DESCRIPTION
 .I minipro
 is an Open Source tool intended to become a complete cross-platform
-replacement for the proprietary utility from Autoelectric. Currently it
+replacement for the proprietary utility from Xgecu.  Currently it
 supports more than 13000 of target devices - including AVRs, PICs as
 well as a huge number of other microcontrollers and various memory
 chips.
+
+.I minipro
+currently supports the TL866A/CS, TL866II+, and T48.  Support for the
+T56 is very experimental.
 
 .SH GENERAL OPTIONS
 .TP
@@ -23,7 +28,7 @@ List devices like this.
 .B \-q, --programmer <version>
 Force a programmer version when listing devices.
 .br
-Possible values: TL866A TL866II.
+Possible values (case insensitive): TL866A TL866II T48.
 
 .TP
 .B \-Q, \--query_supported
@@ -39,7 +44,6 @@ Show device information.
 
 .TP
 .B \-D, \--get_id
-FIXME
 Just read the chip ID and do nothing else (like reading the whole chip
 contents).  This is for use in scripts where you have for example
 several similar chips with different IDs and want to check if the
@@ -381,6 +385,12 @@ to an AT29C256 256 kilobit (32-kilobytes) electrically-erasable Flash
 EPROM.  Remember to put single or double quotes around the device name
 to prevent the shell from interpreting the \fB"@\fR" (at sign).
 
+.SH CAVEATS
+The TL866A and TL866CS programmers appear to have a firmware bug such
+that if not quite enough current is provided to them from a USB port,
+then the programmer will fail to initialize itself or reset itself after
+an operation.  This problem seems to go hand-in-hand with newer USB 3.0
+/ xHCI ports.  This problem can be avoided by using a powered hub.
 
 .SH AUTHOR
 .I minipro
@@ -389,9 +399,10 @@ have contributed code and bug reports.  Development is currently coordinated
 by David Griffith.
 
 .SH HARDWARE
-The Minipro TL866xx series of chip programmers is distributed by
-Autoelectric.  Their website is
-.BR http://www.autoelectric.cn.
+
+The TL866A/CS, TL866II+, and T48 chip programmers are distributed by
+Xgecu, formerly Autoelectric.  Its website is
+.BR http://www.xgecu.com/en/.
 
 .SH DISTRIBUTION
 The canonical repository for
