@@ -145,7 +145,7 @@ static char signon[] = "minipro version %s     A free and open TL866 series prog
 
 void print_version_and_exit(cmdopts_t *cmdopts)
 {
-	fprintf(stderr, "Supported programmers: TL866A/CS, TL866II+,");
+	fprintf(stderr, "Supported programmers: TL866A/CS, TL866II+, ");
 	fprintf(stderr, "T48 (experimental)\n");
 	/* Don't mention this yet. DG */
 /*	fprintf(stderr, "T56 (experimental)\n"); */
