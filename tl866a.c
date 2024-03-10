@@ -1522,21 +1522,21 @@ int tl866a_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
 						      sizeof(gnd_pins[0]));
 			if (!pwr_pin)
 				return EXIT_FAILURE;
-			pwr[(pwr_pin->latch - 2) * 2 + 10] |= pwr_pin->mask;
+			pwr[pwr_pin->latch * 2 + 10] |= pwr_pin->mask;
 		} else if (pins[i].vcc) {
 			pwr_pin = get_pwr_pin(i + 1, vcc_pins,
 					      sizeof(vcc_pins) /
 						      sizeof(vcc_pins[0]));
 			if (!pwr_pin)
 				return EXIT_FAILURE;
-			pwr[(pwr_pin->latch - 2) * 2 + 10] &= pwr_pin->mask;
+			pwr[pwr_pin->latch * 2 + 10] &= pwr_pin->mask;
 		} else if (pins[i].vpp) {
 			pwr_pin = get_pwr_pin(i + 1, vpp_pins,
 					      sizeof(vpp_pins) /
 						      sizeof(vpp_pins[0]));
 			if (!pwr_pin)
 				return EXIT_FAILURE;
-			pwr[(pwr_pin->latch - 2) * 2 + 10] |= pwr_pin->mask;
+			pwr[pwr_pin->latch * 2 + 10] |= pwr_pin->mask;
 		}
 	}
 
