@@ -3185,7 +3185,19 @@ int main(int argc, char **argv)
 			minipro_close(handle);
 			return EXIT_FAILURE;
 		}
+		/* Print a warning about write-protection */
+		if(handle->device->flags.protect_after &&
+		   !handle->cmdopts->protect_on) {
+			fprintf(stderr,
+				"Use -P if you want to write-protect this chip.\n");
+		}
 		ret = action_write(handle);
+		/* Print a warning about write-protection */
+		if(ret == EXIT_FAILURE && handle->device->flags.off_protect_before &&
+		   !handle->cmdopts->protect_off) {
+			fprintf(stderr,
+				"This chip may be write-protected. Use -u and try again.\n");
+		}
 		break;
 	case VERIFY:
 	case BLANK_CHECK:
