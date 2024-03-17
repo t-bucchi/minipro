@@ -409,6 +409,46 @@ int t48_get_ovc_status(minipro_handle_t *handle,
 	return EXIT_SUCCESS;
 }
 
+int t48_write_jedec_row(minipro_handle_t *handle, uint8_t *buffer,
+				uint8_t row, uint8_t flags, size_t size)
+{
+	/* Warning: Using JEDEC algorithm for TL866ii+. Results in T48 may be unexpected */
+	if (handle->device->flags.custom_protocol) {
+		return bb_write_jedec_row(handle, buffer, row, flags, size);
+	}
+	uint8_t msg[64];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_WRITE_JEDEC;
+	msg[1] = handle->device->protocol_id;
+	msg[2] = size;
+	msg[4] = row;
+	msg[5] = flags;
+	memcpy(&msg[8], buffer, (size + 7) / 8);
+	return msg_send(handle->usb_handle, msg, 64);
+}
+
+int t48_read_jedec_row(minipro_handle_t *handle, uint8_t *buffer,
+			       uint8_t row, uint8_t flags, size_t size)
+{
+	/* Warning: Using JEDEC algorithm for TL866ii+. Results in T48 may be unexpected */
+	if (handle->device->flags.custom_protocol) {
+		return bb_read_jedec_row(handle, buffer, row, flags, size);
+	}
+	uint8_t msg[32];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_READ_JEDEC;
+	msg[1] = handle->device->protocol_id;
+	msg[2] = size;
+	msg[4] = row;
+	msg[5] = flags;
+	if (msg_send(handle->usb_handle, msg, 8))
+		return EXIT_FAILURE;
+	if (msg_recv(handle->usb_handle, msg, 32))
+		return EXIT_FAILURE;
+	memcpy(buffer, msg, (size + 7) / 8);
+	return EXIT_SUCCESS;
+}
+
 /* Pull: 0=Pull-up, 1=Pull-down */
 static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 {
