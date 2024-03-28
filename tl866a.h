@@ -25,7 +25,12 @@
 
 /*
  * These are the known firmware versions along with the versions of the
- * official software from whence they came.
+ * official software from whence they came displayed in reverse
+ * chronological order.  Firmware versions generally progress
+ * sequentially and are not always updated with each release of the
+ * official program.  Some firmware versions may have appeared first in
+ * program versions earlier than listed here because they are yet
+ * unknown, missing, or lost.
  *
  * Firmware	Official	Release		Firmware
  * Version	Program		Date		Version
