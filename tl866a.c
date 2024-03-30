@@ -1011,7 +1011,7 @@ int tl866a_firmware_update(minipro_handle_t *handle, const char *firmware)
 		return EXIT_FAILURE;
 	}
 
-	fprintf(stderr, "%s contains firmware version 3.2.%u", firmware,
+	fprintf(stderr, "%s contains firmware version 03.2.%02u", firmware,
 		update_dat.header[0]);
 	if ((handle->firmware & 0xFF) > update_dat.header[0])
 		fprintf(stderr, " (older)");
