@@ -119,7 +119,7 @@ static int minipro_get_system_info(minipro_handle_t *handle)
 
 	handle->firmware = load_int(&msg[4], 2, MP_LITTLE_ENDIAN);
 	snprintf(handle->firmware_str, sizeof(handle->firmware_str),
-		 "%02d.%d.%d", hw, msg[5], msg[4]);
+		 "%02d.%d.%02d", hw, msg[5], msg[4]);
 	return EXIT_SUCCESS;
 }
 
