@@ -150,10 +150,10 @@ void print_version_and_exit(cmdopts_t *cmdopts)
 	/* Don't mention this yet. DG */
 /*	fprintf(stderr, "T56 (experimental)\n"); */
 	minipro_handle_t *handle = minipro_open(VERBOSE);
-	if (handle) {
+	if (handle != NULL) {
 		minipro_print_system_info(handle);
 		minipro_close(handle);
-	}
+	} /* No need to complain if this fails. */
 
 	char output[] =
 		"Commit date:\t%s\n"
