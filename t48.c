@@ -74,6 +74,13 @@
 #define T48_READ_PINS		 0x35
 #define T48_SET_OUT		 0x36
 
+/* Firmware */
+#define T48_UPDATE_DAT_SIZE	260008
+#define T48_ENC_FIRMWARE_SIZE
+#define T48_UNENC_FIRMWARE_SIZE
+#define T48_BOOTLOADER_SIZE
+#define T48_FIRMWARE_BLOCK_SIZE
+
 /* #define DEBUG_USB_MSG */
 #ifdef DEBUG_USB_MSG
 static void print_msg(uint8_t *buffer, size_t size)
