@@ -312,9 +312,9 @@ uint32_t load_int(uint8_t *buffer, size_t size, uint8_t endianness);
 
 /* Helper functions */
 void minipro_print_system_info(minipro_handle_t *handle);
-uint32_t crc32(uint8_t *data, size_t size, uint32_t initial);
 int write_logic_file(minipro_handle_t *handle, uint8_t *first_step,
 		     uint8_t *second_step);
+uint32_t crc_32(uint8_t *data, size_t size, uint32_t initial);
 int minipro_reset(minipro_handle_t *handle);
 int minipro_get_devices_count(uint8_t version);
 
