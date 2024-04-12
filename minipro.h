@@ -242,6 +242,10 @@ typedef struct cmdopts_s {
 		IHEX,
 		SREC
 	} format;
+	enum {
+		V_1V8 = 0,
+		V_3V3
+	} vopt;
 	uint8_t no_erase;
 	uint8_t protect_off;
 	uint8_t protect_on;
@@ -269,14 +273,7 @@ typedef struct minipro_handle {
 	uint32_t firmware;
 	uint8_t status;
 	uint8_t version;
-
 	device_t *device;
-	uint8_t icsp;
-	enum {
-		V_1V8 = 0,
-		V_3V3
-	} vopt;
-
 	void *usb_handle;
 	cmdopts_t *cmdopts;
 
