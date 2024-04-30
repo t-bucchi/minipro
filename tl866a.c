@@ -1250,6 +1250,10 @@ static uint8_t *do_ic_test(minipro_handle_t *handle)
 	if (!result)
 		return NULL;
 
+	if (handle->device->vector_count == 0) {
+		return NULL;
+	}
+
 	if (pwr_init(handle, handle->device->vectors, pin_count)) {
 		return NULL;
 	}
