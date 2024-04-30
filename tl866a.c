@@ -23,6 +23,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <assert.h>
 
 #include "database.h"
 #include "minipro.h"
@@ -1178,6 +1179,7 @@ static zif_pins_t *get_pwr_pin(int pin, zif_pins_t *table, int count)
 
 static int pwr_init(minipro_handle_t *handle, uint8_t *vector, size_t pin_count)
 {
+	assert(vector != NULL);
 	static uint8_t pwr[] = { TL866A_POWER_ON,
 				 0x00,
 				 0x00,
