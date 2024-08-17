@@ -190,7 +190,7 @@ typedef struct device {
 	package_details_t
 		package_details; /* pins count or image ID for some devices */
 	void *config; /* Configuration bytes that's presenting in some architectures */
-	uint8_t vector_count;
+	int vector_count;
 	uint8_t *vectors;
 } device_t;
 
