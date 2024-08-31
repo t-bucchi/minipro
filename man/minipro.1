@@ -327,6 +327,63 @@ is specified, then
 .B -c code
 is assumed.
 
+.SH ADDING CUSTOM CHIPS
+Custom chips can be added in the
+.B infoic.xml
+file, but it must be noted that the since content is generated from the
+.B infoic.dll
+, the custom chips should be added in a proper section of the xml file.
+
+Add any new chip as an
+.B <ic>
+section in a proper
+.B <custom name="MyCustom">
+section of the file.
+
+It must be also noted that the pinout is hardcoded in the device firmware, so if
+the chip has a custom pinout, the use of bit banging technique is required, limiting the
+functionality to only erading it as a PROM type.
+
+In this case, the
+.B <protocol_id>
+value must be set to
+.B 0x80000001
+and the
+.B <variant>
+value must be set to the pinout value defined in the
+.B prom_table
+array in
+.B prom.c
+file.
+
+For example, the D2364C PROM has a slightly different pinout than any DIP24 PROM, thus the pins has been
+exchanged in the prom.c file. The index 0x0b has been assigned to this pinout. So the resulting xml entry is:
+
+    <custom name="NEC">
+          <ic name="D2364C@DIP24"
+          type="1"
+          protocol_id="0x80000001"
+          variant="0x0c"
+          read_buffer_size="0x10"
+          write_buffer_size="0x00"
+          code_memory_size="0x2000"
+          data_memory_size="0x00"
+          data_memory2_size="0x00"
+          page_size="0x0000"
+          pages_per_block="0x0000"
+          chip_id="0x00000000"
+          voltages="0x0900"
+          pulse_delay="0x0000"
+          flags="0x00000000"
+          chip_info="0x0000"
+          pin_map="0x0017"
+          blank_value = "0x00"
+          package_details="0x18000000"
+          config="NULL"
+      />
+    </custom>
+
+
 .SH PIPES
 
 .B Minipro

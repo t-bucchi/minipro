@@ -153,6 +153,15 @@ static prom_t prom_table[] = {
 		  (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 21, 19, 18, 0 },
 	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
 	  .compare_mask = 0xff },
+
+	/* Type 12; 8192x8; DIP24 (D2364C) */
+	{ .gnd_pins = (uint8_t[]){ 12, 0 },
+	  .vcc_pins = (uint8_t[]){ 24, 0 },
+	  .data_bus_pins = (uint8_t[]){ 9, 10, 11, 13, 14, 15, 16, 17, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 19, 18, 21, 0 },
+	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
+	  .compare_mask = 0xff },
 };
 
 static mask_prom_t mask_prom_table[] = {
