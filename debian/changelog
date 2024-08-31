@@ -1,4 +1,11 @@
-minipro (0.4-1) UNRELEASED; urgency=medium
+minipro (0.7.1) jammy; urgency=medium
+
+  * Debian Version Update
+  * Added D2364C custom chip
+
+ -- Federico Fuga <fuga@studiofuga.com>  Sat, 31 Aug 2024 10:44:48 +0200
+
+minipro (0.4-1) unstable; urgency=medium
 
   * Updated to support TL866II+
   * Significant enhancements in usablity and functionality.
