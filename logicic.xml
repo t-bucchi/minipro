@@ -19,16 +19,16 @@
         <vector id="03"> 1 1 L L 1 1 G 1 1 L L 1 1 V </vector>
       </ic>
       <ic name="4002" type="5" voltage="5V" pins="14">
-        <vector id="00"> L 0 0 0 1 0 G 0 1 1 0 0 L V </vector>
-        <vector id="01"> L 0 0 0 1 0 G 0 1 0 0 0 L V </vector>
-        <vector id="02"> L 0 0 0 1 0 G 0 1 1 1 1 L V </vector>
-        <vector id="03"> L 0 0 1 1 0 G 0 0 0 1 1 L V </vector>
-        <vector id="04"> L 1 1 0 0 0 G 0 1 1 1 1 L V </vector>
-        <vector id="05"> L 0 1 0 0 0 G 0 0 1 0 0 L V </vector>
-        <vector id="06"> L 1 1 1 1 0 G 0 1 1 1 1 L V </vector>
-        <vector id="07"> H 0 0 0 0 0 G 0 0 0 0 0 H V </vector>
-        <vector id="08"> L 1 0 1 0 0 G 0 1 0 1 0 L V </vector>
-        <vector id="09"> L 0 1 0 1 0 G 0 0 1 0 1 L V </vector>
+        <vector id="00"> L 0 0 0 1 X G X 1 1 0 0 L V </vector>
+        <vector id="01"> L 0 0 0 1 X G X 1 0 0 0 L V </vector>
+        <vector id="02"> L 0 0 0 1 X G X 1 1 1 1 L V </vector>
+        <vector id="03"> L 0 0 1 1 X G X 0 0 1 1 L V </vector>
+        <vector id="04"> L 1 1 0 0 X G X 1 1 1 1 L V </vector>
+        <vector id="05"> L 0 1 0 0 X G X 0 1 0 0 L V </vector>
+        <vector id="06"> L 1 1 1 1 X G X 1 1 1 1 L V </vector>
+        <vector id="07"> H 0 0 0 0 X G X 0 0 0 0 H V </vector>
+        <vector id="08"> L 1 0 1 0 X G X 1 0 1 0 L V </vector>
+        <vector id="09"> L 0 1 0 1 X G X 0 1 0 1 L V </vector>
       </ic>
       <ic name="4007" type="5" voltage="5V" pins="14">
         <vector id="00"> H 1 0 0 X 0 G X 0 0 1 H H V </vector>
@@ -450,12 +450,12 @@
         <vector id="03"> L 1 0 0 0 0 0 G 1 0 0 0 0 0 0 V </vector>
       </ic>
       <ic name="4049" type="5" voltage="5V" pins="16">
-        <vector id="00"> V L 1 H 0 L 1 G 0 H 1 L 1 1 L 1 </vector>
-        <vector id="01"> V H 0 L 1 H 0 G 1 L 0 H 0 1 L 1 </vector>
+        <vector id="00"> V L 1 H 0 L 1 G 0 H 1 L X 1 L X </vector>
+        <vector id="01"> V H 0 L 1 H 0 G 1 L 0 H X 1 L X </vector>
       </ic>
       <ic name="4050" type="5" voltage="5V" pins="16">
-        <vector id="00"> V H 1 L 0 H 1 G 1 H 0 L 0 1 H 1 </vector>
-        <vector id="01"> V L 0 H 1 L 0 G 0 L 1 H 0 0 L 1 </vector>
+        <vector id="00"> V H 1 L 0 H 1 G 1 H 0 L X 1 H X </vector>
+        <vector id="01"> V L 0 H 1 L 0 G 0 L 1 H X 0 L X </vector>
       </ic>
       <ic name="4051" type="5" voltage="5V" pins="16">
         <vector id="00"> 1 1 L 1 1 0 0 G 0 0 0 1 0 1 1 V </vector>
@@ -1305,16 +1305,16 @@
         <vector id="08"> 1 1 1 1 1 L G L 1 1 1 1 1 V </vector>
       </ic>
       <ic name="74145" type="5" voltage="5V" pins="16">
-      	<vector id="00"> L Z Z Z Z Z Z G Z Z Z 0 0 0 0 V </vector>
-      	<vector id="01"> Z L Z Z Z Z Z G Z Z Z 0 0 0 1 V </vector>
-      	<vector id="02"> Z Z L Z Z Z Z G Z Z Z 0 0 1 0 V </vector>
-      	<vector id="03"> Z Z Z L Z Z Z G Z Z Z 0 0 1 1 V </vector>
-      	<vector id="00"> Z Z Z Z L Z Z G Z Z Z 0 1 0 0 V </vector>
-      	<vector id="00"> Z Z Z Z Z L Z G Z Z Z 0 1 0 1 V </vector>
-      	<vector id="00"> Z Z Z Z Z Z L G Z Z Z 0 1 1 0 V </vector>
-      	<vector id="00"> Z Z Z Z Z Z Z G L Z Z 0 1 1 1 V </vector>
-      	<vector id="00"> Z Z Z Z Z Z Z G Z L Z 1 0 0 0 V </vector>
-      	<vector id="00"> Z Z Z Z Z Z Z G Z Z L 1 0 0 1 V </vector>
+        <vector id="00"> L Z Z Z Z Z Z G Z Z Z 0 0 0 0 V </vector>
+        <vector id="01"> Z L Z Z Z Z Z G Z Z Z 0 0 0 1 V </vector>
+        <vector id="02"> Z Z L Z Z Z Z G Z Z Z 0 0 1 0 V </vector>
+        <vector id="03"> Z Z Z L Z Z Z G Z Z Z 0 0 1 1 V </vector>
+        <vector id="04"> Z Z Z Z L Z Z G Z Z Z 0 1 0 0 V </vector>
+        <vector id="05"> Z Z Z Z Z L Z G Z Z Z 0 1 0 1 V </vector>
+        <vector id="06"> Z Z Z Z Z Z L G Z Z Z 0 1 1 0 V </vector>
+        <vector id="07"> Z Z Z Z Z Z Z G L Z Z 0 1 1 1 V </vector>
+        <vector id="08"> Z Z Z Z Z Z Z G Z L Z 1 0 0 0 V </vector>
+        <vector id="09"> Z Z Z Z Z Z Z G Z Z L 1 0 0 1 V </vector>
       </ic>
       <ic name="74147" type="5" voltage="5V" pins="16">
         <vector id="00"> 1 1 1 1 1 H H G H 1 1 1 1 H 0 V </vector>
@@ -3043,12 +3043,12 @@
         <vector id="05"> C 0 0 0 V 0 0 H H G L H 0 C </vector>
       </ic>
       <ic name="7493" type="5" voltage="5V" pins="14">
-        <vector id="00"> C 1 1 0 V 0 0 L L G L L 0 C </vector>
-        <vector id="01"> C 0 0 0 V 0 0 L H G L H 0 C </vector>
-        <vector id="02"> C 0 0 0 V 0 0 H L G L L 0 C </vector>
-        <vector id="03"> C 0 0 0 V 0 0 H H G L H 0 C </vector>
-        <vector id="04"> C 0 0 0 V 0 0 L L G H L 0 C </vector>
-        <vector id="05"> C 0 0 0 V 0 0 L H G H H 0 C </vector>
+        <vector id="00"> C 1 1 X V X X L L G L L X C </vector>
+        <vector id="01"> C 0 0 X V X X L H G L H X C </vector>
+        <vector id="02"> C 0 0 X V X X H L G L L X C </vector>
+        <vector id="03"> C 0 0 X V X X H H G L H X C </vector>
+        <vector id="04"> C 0 0 X V X X L L G H L X C </vector>
+        <vector id="05"> C 0 0 X V X X L H G H H X C </vector>
       </ic>
       <ic name="7495" type="5" voltage="5V" pins="14">
         <vector id="00"> 1 0 0 0 1 1 G C 0 H L L L V </vector>
