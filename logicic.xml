@@ -3180,6 +3180,25 @@
         <vector id="04"> 1 1 1 L 1 L 1 L 1 L 1 G 1 C L 1 L 1 L 1 L 1 H V </vector>
         <vector id="05"> 1 0 0 Z 0 Z 0 Z 0 Z 1 G 0 1 Z 0 Z 0 Z 0 Z 0 H V </vector>
       </ic>
-    </custom>   
+      <ic name="82C55A-5(OKI)" type="5" voltage="5V" pins="40">
+        <vector id="00"> 1 1 1 1 1 1 G X X 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 V X X X X X X X X 1 1 1 1 1 1 </vector>
+        <vector id="01"> 0 1 0 1 0 0 G 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 V L H L H L H L H 0 1 0 1 0 1 </vector>
+        <vector id="02"> 1 0 1 0 0 0 G 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 V H L H L H L H L 0 1 1 0 1 0 </vector>
+        <vector id="03"> 1 0 1 0 0 0 G 0 0 0 0 0 0 0 0 0 0 1 0 1 0 1 0 1 0 V H L H L H L H L 0 1 1 0 1 0 </vector>
+        <vector id="04"> 1 0 1 0 0 0 G 1 0 1 0 1 0 0 1 0 1 1 0 1 0 1 0 1 0 V H L H L H L H L 0 1 1 0 1 0 </vector>
+        <vector id="05"> 1 0 1 0 0 0 G 0 1 1 0 1 0 0 1 0 1 1 0 1 0 1 0 1 0 V L H L H L H L H 0 1 1 0 1 0 </vector>
+        <vector id="06"> X X X X 1 0 G 1 1 X X X X X X X X X X X X X X X X V 1 0 0 0 0 0 0 0 0 0 X X X X </vector>
+        <vector id="07"> X X X X 1 0 G 1 1 X X X X X X X X X X X X X X X X V 1 0 0 0 0 0 0 0 0 1 X X X X </vector>
+        <vector id="08"> X X X X 1 0 G 0 1 X X X X X X X X X X X X X X X X V 0 0 0 0 0 0 0 0 0 0 X X X X </vector>
+        <vector id="09"> X X X X 1 0 G 0 1 X X X X X X X X X X X X X X X X V 0 0 0 0 0 0 0 0 0 1 X X X X </vector>
+        <vector id="10"> L L L L 1 0 G 0 0 L L L L L L L L L L L L L L L L V 1 0 1 0 1 0 1 0 0 0 L L L L </vector>
+        <vector id="11"> H L H L 1 0 G 0 0 L L L L L L L L L L L L L L L L V 1 0 1 0 1 0 1 0 0 1 H L H L </vector>
+        <vector id="12"> H L H L 1 0 G 0 1 L L L L L L L L L L L L L L L L V 0 1 0 1 0 1 0 1 0 0 H L H L </vector>
+        <vector id="13"> H L H L 1 0 G 0 1 L L L L L L L L H L H L H L H L V 0 1 0 1 0 1 0 1 0 1 H L H L </vector>
+        <vector id="14"> H L H L 1 0 G 1 0 L L L L L L L L H L H L H L H L V 1 0 1 0 1 0 1 0 0 0 H L H L </vector>
+        <vector id="15"> H L H L 1 0 G 1 0 H L H L L H L H H L H L H L H L V 1 0 1 0 1 0 1 0 0 1 H L H L </vector>
+        <vector id="16"> H L H L 1 0 G 1 0 H L H L L H L H H L H L H L H L V 1 0 1 0 1 0 1 0 0 0 H L H L </vector>
+      </ic>
+    </custom>
   </database>
 </logicic>
