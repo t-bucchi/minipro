@@ -1,5 +1,5 @@
 # minipro
-## Latest "stable" version 0.7
+## Latest "stable" version 0.7.1
 
 An open source program for controlling the MiniPRO TL866xx series of
 chip programmers

@@ -1,3 +1,22 @@
+Summary of changes between minipro 0.7 and minipro 0.7.1
+========================================================
+
+Minipro 0.7.1 was released on Wednesday September 4, 2024
+
+NEW FEATURES
+
+- Added support for NEC D2364C custom chip.
+
+- Allow more than 256 vectors to be used.
+
+BUG FIXES
+
+- Removed GIT_HASH_SHORT define from Makefile, which wasn't used and
+  caused hash inconsistencies.
+
+- Fixes for test vectors.
+
+
 Summary of changes between minipro 0.6 and minipro 0.7
 ======================================================
 

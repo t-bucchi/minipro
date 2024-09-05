@@ -24,7 +24,7 @@ MANDIR ?= $(PREFIX)/share/man
 ##########################################################################
 
 NAME = minipro
-VERSION = 0.7
+VERSION = 0.7.1
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
@@ -33,12 +33,10 @@ GIT_DIR ?= .git
 ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
         GIT_BRANCH = $(shell git rev-parse --abbrev-ref HEAD)
         GIT_HASH = $(shell git rev-parse HEAD)
-        GIT_HASH_SHORT = $(shell git rev-parse --short HEAD)
         GIT_DATE = $(shell git show -s --format=%ci)
 else
         GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*//)
         GIT_HASH = "$Format:%H$"
-        GIT_HASH_SHORT = "$Format:%h$"
         GIT_DATE = "$Format:%ci$"
 endif
 BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
@@ -107,7 +105,6 @@ $(VERSION_HEADER):
 	@echo "#define VERSION \"$(VERSION)\"" >> $@
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
-	@echo "#define GIT_HASH_SHORT \"$(GIT_HASH_SHORT)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
 
 $(VERSION_STRINGS):
