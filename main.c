@@ -106,6 +106,7 @@ static struct option long_options[] = {
 	{ "lock", no_argument, NULL, 1 },
 	{ "infoic", required_argument, NULL, 3 },
 	{ "logicic", required_argument, NULL, 4 },
+	{ "logicic_out", required_argument, NULL, 5 },
 	{ "list", no_argument, NULL, 'l' },
 	{ "search", required_argument, NULL, 'L' },
 	{ "get_info", required_argument, NULL, 'd' },
@@ -747,6 +748,9 @@ void parse_cmdline(int argc, char **argv, cmdopts_t *cmdopts)
 			break;
 		case 4:
 			cmdopts->logicic_path = optarg; /* Custom logicic.xml */
+			break;
+		case 5:
+			cmdopts->logicic_out = optarg; /* Logic test output file */
 			break;
 
 		case 'q':

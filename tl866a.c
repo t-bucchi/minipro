@@ -1379,6 +1379,9 @@ int tl866a_logic_ic_test(minipro_handle_t *handle)
 
 	if (!(result = do_ic_test(handle))) {
 		fprintf(stderr, "Error running logic test.\n");
+	} else if (handle->cmdopts->logicic_out) {
+		/* WARNING: untested */
+		ret = write_logic_file(handle, result, result);
 	} else {
 		int errors = 0, err;
 		static const char pst[] = "01LHCZXGV";

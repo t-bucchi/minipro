@@ -70,6 +70,74 @@ uint32_t crc32(uint8_t *data, size_t size, uint32_t initial)
 	return crc;
 }
 
+/* Write out results of a logic test. Instead of checking test
+ * results they are just written out to a file. Any expected
+ * L, H or Z values in the vector are replaced with the read
+ * logic state
+ */
+
+int write_logic_file(minipro_handle_t *handle, uint8_t *first_step,
+				uint8_t *second_step)
+{
+	FILE *out;
+	uint8_t *pfirst = first_step;
+	uint8_t *psecond = second_step;
+	uint8_t *pvec = handle->device->vectors;
+	char *device_name = handle->cmdopts->device_name;
+	int pin_count = handle->device->package_details.pin_count;
+	int vector_count = handle->device->vector_count;
+	static const char pst[] = "01LHCZXGV";
+	static const char *vcc_table[] = {"5V", "3V3", "2V5", "1V8"};
+
+	const char *vcc = vcc_table[handle->device->voltages.vcc];
+
+	/* Must have enough space for max pins (48) + spaces between each character */
+	char linebuf[100];
+
+	out = fopen(handle->cmdopts->logicic_out, "w");
+	if (out == NULL)
+		return EXIT_FAILURE;
+	fputs("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", out);
+	fputs("<logicic>\n", out);
+	fputs("  <database device=\"LOGIC\">\n", out);
+	fputs("    <manufacturer name=\"Logic Ic\">\n", out);
+	fprintf(out, "      <ic name=\"%s\" type=\"5\" voltage=\"%s\" pins=\"%d\">\n",
+		device_name, vcc, pin_count);
+	for (int i = 0; i < vector_count; i++) {
+		char *p = linebuf;
+		for (int j = 0; j < pin_count; j++) {
+			/* If vector doesn't require a test just copy existing value */
+			if (*pvec != LOGIC_L && *pvec != LOGIC_H && *pvec != LOGIC_Z)
+				*p = pst[*pvec];
+			/* Pulled high: H */
+			else if (*pfirst && *psecond)
+				*p = 'H';
+			/* Pulled low: L */
+			else if (!*pfirst && !*psecond)
+				*p = 'L';
+			/* Not pulled at all: Z */
+			else if (*pfirst && !*psecond)
+				*p = 'Z';
+			else
+			/* Should be impossible */
+				*p = '?';
+			pfirst++;
+			psecond++;
+			pvec++;
+			*++p = ' ';
+			p++;
+		}
+		*p = 0;
+		fprintf(out, "        <vector id=\"%02d\"> %s</vector>\n", i, linebuf);
+	}
+	fputs("      </ic>\n", out);
+	fputs("    </manufacturer>\n", out);
+	fputs("  </database>\n", out);
+	fputs("</logicic>\n", out);
+	fclose(out);
+	return EXIT_SUCCESS;
+}
+
 static int minipro_get_system_info(minipro_handle_t *handle)
 {
 	uint8_t msg[80], hw;
