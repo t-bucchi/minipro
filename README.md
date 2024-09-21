@@ -1,26 +1,26 @@
 # minipro
-## Latest "stable" version 0.7.1
+## Latest "stable" version 0.7.2
 
-An open source program for controlling the MiniPRO TL866xx series of
-chip programmers
+An open source program for controlling XGeku's series of chip programmers.
 
-This program exists because the manufacturer of the MiniPRO TL866xx
-series of chip programmers does not provide a program for use on Linux
-or other flavors of Unix.  We who keep this project going prefer a
+This program exists because XGeku does not provide a program for use on
+Linux or other flavors of Unix.  We who keep this project going prefer a
 simple, free, and open-source program that presents a command-line
 interface that allows for a GUI front-end if desired.
 
 
 ## Features
 * Native support for Linux, BSD, and other flavors of Unix.
-* Compatibility with Minipro TL866CS, TL866A, and TL866II+ from
-Autoelectric (http://www.autoelectric.cn/en/tl866_main.html)
-* Experimental support for Xgecu T48 programmer
+* Compatibility with TL866CS, TL866A, and TL866II+ from XGeku
+  (http://www.xgecu.com/en/)
+* Experimental support for Xgecu's T48 and T56 programmers
 * More than 13000 target devices (including AVRs, PICs, various BIOSes
-and EEPROMs)
+  and EEPROMs)
 * ZIF40 socket and ISP support
 * Vendor-specific MCU configuration bits
 * Chip ID verification
+* Logic IC testing
+* Bitbang support
 * Overcurrent protection
 * System testing
 
@@ -176,3 +176,15 @@ cd minipro
 make
 sudo make install
 ```
+
+### Checksum notes
+
+When you download an archive/tarball from Gitlab, there is no guarantee
+that the file given to you will hash to the same value time and time
+again.  For Gitlab to allow for this would require it to store a very
+large amount of data.  If you run a packaging system that depends on
+hashes like that, consider following the example of the FreeBSD ports
+system.  What they do is use the SHA-1 hash of the version to be
+installed.  Check out how FreeBSD does it for Minipro here:
+https://github.com/freebsd/freebsd-ports/tree/main/sysutils/minipro
+
