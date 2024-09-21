@@ -1,3 +1,13 @@
+Summary of changes between minipro 0.7.1 and minipro 0.7.2
+==========================================================
+
+Minipro 0.7.2 was released on Saturday September 21, 2024
+
+BUG FIXES
+
+- Reworked GIT_BRANCH handling in the Makefile.
+
+
 Summary of changes between minipro 0.7 and minipro 0.7.1
 ========================================================
 
