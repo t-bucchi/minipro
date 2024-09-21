@@ -24,7 +24,7 @@ MANDIR ?= $(PREFIX)/share/man
 ##########################################################################
 
 NAME = minipro
-VERSION = 0.7.1
+VERSION = 0.7.2
 
 # If we're working from git, we have access to proper variables. If
 # not, make it clear that we're working from a release.
@@ -35,7 +35,8 @@ ifneq ($(and $(wildcard $(GIT_DIR)),$(shell which git)),)
         GIT_HASH = $(shell git rev-parse HEAD)
         GIT_DATE = $(shell git show -s --format=%ci)
 else
-        GIT_BRANCH = $(shell echo "$Format:%D$" | sed s/^.*\>\\s*//)
+
+	GIT_BRANCH = $(shell echo "$Format:%D$" | rev | cut -d" " -f1 | rev)
         GIT_HASH = "$Format:%H$"
         GIT_DATE = "$Format:%ci$"
 endif
