@@ -6,3 +6,4 @@ version.c
 *.tar
 *.gz
 .idea
+algorithm.xml
