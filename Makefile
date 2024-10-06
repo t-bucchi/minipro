@@ -148,11 +148,19 @@ install:
 	cp $(LOGICIC) $(SHARE_INSTDIR)/
 
 	@if [ ! -f "$(ALGORITHM)" ]; then \
-		echo "$(ALGORITHM) is missing.  Please put it here."; \
-		exit 1; \
+		echo "" ; \
+		echo "**************************************************************"; \
+		echo "**************************************************************"; \
+		echo "*** $(ALGORITHM) is missing.  T56 functionality is disabled."; \
+		echo "*** This file cannot be included with this package."; \
+		echo "*** Later on this file will be automatically downloaded."; \
+		echo "**************************************************************"; \
+		echo "**************************************************************"; \
+		echo ""; \
+	else \
+		cp $(ALGORITHM) $(SHARE_INSTDIR)/; \
 	fi
 
-	cp $(ALGORITHM) $(SHARE_INSTDIR)/
 	cp man/minipro.1 $(MAN_INSTDIR)/
 	if [ -n "$(UDEV_DIR)" ]; then \
 		mkdir -p $(UDEV_RULES_INSTDIR); \
