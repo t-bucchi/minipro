@@ -146,6 +146,12 @@ install:
 	cp $(MINIPRO) $(BIN_INSTDIR)/
 	cp $(INFOIC) $(SHARE_INSTDIR)/
 	cp $(LOGICIC) $(SHARE_INSTDIR)/
+
+	@if [ ! -f "$(ALGORITHM)" ]; then \
+		echo "$(ALGORITHM) is missing.  Please put it here."; \
+		exit 1; \
+	fi
+
 	cp $(ALGORITHM) $(SHARE_INSTDIR)/
 	cp man/minipro.1 $(MAN_INSTDIR)/
 	if [ -n "$(UDEV_DIR)" ]; then \
