@@ -34,7 +34,9 @@ $ minipro -p ATMEGA48 -r atmega48.bin
 ## Prerequisites
 
 You'll need some sort of Linux or MacOS machine.  Other Unices may work, 
-though that is untested.  You will need version 1.0.16 or greater of libusb.
+though that is untested.  You will need version 1.0.16 or greater of
+libusb and version 1.2 or greater of libb64.  Earlier verions may work,
+but are untested.
 
 
 ## Installation on Linux
@@ -43,17 +45,18 @@ though that is untested.  You will need version 1.0.16 or greater of libusb.
 
 #### Debian/Ubuntu
 ```nohighlight
-sudo apt-get install build-essential pkg-config git libusb-1.0-0-dev
+sudo apt-get install build-essential pkg-config git libusb-1.0-0-dev libb64-dev
+
 ```
 
 #### CentOS 7
 ```nohighlight
-sudo yum install gcc make pkgconfig git libusbx-devel
+sudo yum install gcc make pkgconfig git libusbx-devel libb64-devel
 ```
 
 #### openSUSE
 ```nohighlight
-sudo zypper install gcc make git-core srecord rpmdevtools libusb-1_0-devel
+sudo zypper install gcc make git-core srecord rpmdevtools libusb-1_0-devel libbdev64-devel
 ```
 
 ### Checkout source code and compile 
