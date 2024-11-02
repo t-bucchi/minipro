@@ -191,7 +191,7 @@ system.  What they do is use the SHA-1 hash of the version to be
 installed.  Check out how FreeBSD does it for Minipro here:
 https://github.com/freebsd/freebsd-ports/tree/main/sysutils/minipro
 
-### IC Testing
+### Attributions
 
 Code and data for testing ICs have been borrowed from
 https://github.com/Johnlon/integrated-circuit-tester and
