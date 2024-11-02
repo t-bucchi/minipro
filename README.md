@@ -187,7 +187,7 @@ that the file given to you will hash to the same value time and time
 again.  For Gitlab to allow for this would require it to store a very
 large amount of data.  If you run a packaging system that depends on
 hashes like that, consider following the example of the FreeBSD ports
-system.  What they do is use the SHA-1 hash of the version to be
+system.  What they do is use the SHA-1 commit hash of the version to be
 installed.  Check out how FreeBSD does it for Minipro here:
 https://github.com/freebsd/freebsd-ports/tree/main/sysutils/minipro
 
