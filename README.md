@@ -56,7 +56,7 @@ sudo yum install gcc make pkgconfig git libusbx-devel libb64-devel
 
 #### openSUSE
 ```nohighlight
-sudo zypper install gcc make git-core srecord rpmdevtools libusb-1_0-devel libbdev64-devel
+sudo zypper install gcc make git-core srecord rpmdevtools libusb-1_0-devel libb64-devel
 ```
 
 ### Checkout source code and compile 
@@ -197,5 +197,3 @@ Code and data for testing ICs have been borrowed from
 https://github.com/Johnlon/integrated-circuit-tester and
 https://github.com/akshaybaweja/Smart-IC-Tester and used in accordance
 with the MIT License (https://opensource.org/license/MIT)
-
-
