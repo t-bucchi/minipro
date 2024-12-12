@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+#include <math.h>
 
 #include "database.h"
 #include "minipro.h"
@@ -60,6 +61,7 @@
 #define T48_BOOTLOADER_WRITE	 0x3B
 #define T48_BOOTLOADER_ERASE	 0x3C
 #define T48_SWITCH		 0x3D
+#define T48_RESET		 0x3F
 
 /* Hardware Bit Banging */
 #define T48_SET_VCC_VOLTAGE	 0x1B
@@ -70,7 +72,7 @@
 #define T48_SET_GND_PIN		 0x30
 #define T48_SET_PULLDOWNS	 0x31
 #define T48_SET_PULLUPS		 0x32
-#define T48_SET_DIR		 0x34
+#define T48_MEASURE_VOLTAGES	 0x33
 #define T48_READ_PINS		 0x35
 #define T48_SET_OUT		 0x36
 
@@ -82,6 +84,120 @@
 
 
 /* #define DEBUG_USB_MSG */
+typedef struct zif_pins_s {
+	uint8_t pin;
+	uint8_t byte;
+	uint8_t mask;
+} zif_pins_t;
+
+/* clang-format off */
+/* 21 VPP pins. */
+static zif_pins_t vpp_pins[] =
+{
+	{ .pin = 31, .byte = 8, .mask = 0x01 },
+	{ .pin = 30, .byte = 8, .mask = 0x02 },
+	{ .pin = 10, .byte = 8, .mask = 0x04 },
+	{ .pin =  9, .byte = 8, .mask = 0x08 },
+	{ .pin =  4, .byte = 8, .mask = 0x10 },
+	{ .pin =  3, .byte = 8, .mask = 0x20 },
+	{ .pin =  2, .byte = 8, .mask = 0x40 },
+	{ .pin =  1, .byte = 8, .mask = 0x80 },
+
+	{ .pin = 32, .byte = 9, .mask = 0x01 },
+	{ .pin = 33, .byte = 9, .mask = 0x02 },
+	{ .pin = 34, .byte = 9, .mask = 0x04 },
+	{ .pin = 36, .byte = 9, .mask = 0x08 },
+	{ .pin = 37, .byte = 9, .mask = 0x10 },
+	{ .pin = 38, .byte = 9, .mask = 0x20 },
+	{ .pin = 39, .byte = 9, .mask = 0x40 },
+	{ .pin = 40, .byte = 9, .mask = 0x80 }
+
+        // J1?
+};
+
+/* 32 VCC Pins. */
+static zif_pins_t vcc_pins[] =
+{
+	{ .pin = 1, .byte = 8, .mask = 0x01 },
+	{ .pin = 2, .byte = 8, .mask = 0x02 },
+	{ .pin = 3, .byte = 8, .mask = 0x04 },
+	{ .pin = 4, .byte = 8, .mask = 0x08 },
+	{ .pin = 5, .byte = 8, .mask = 0x10 },
+	{ .pin = 6, .byte = 8, .mask = 0x20 },
+	{ .pin = 7, .byte = 8, .mask = 0x40 },
+	{ .pin = 8, .byte = 8, .mask = 0x80 },
+	{ .pin = 9, .byte = 9, .mask = 0x80 },
+	{ .pin = 10, .byte = 9, .mask = 0x40 },
+	{ .pin = 11, .byte = 9, .mask = 0x20 },
+	{ .pin = 12, .byte = 9, .mask = 0x10 },
+	{ .pin = 13, .byte = 9, .mask = 0x08 },
+	{ .pin = 14, .byte = 9, .mask = 0x04 },
+	{ .pin = 15, .byte = 9, .mask = 0x02 },
+	{ .pin = 16, .byte = 9, .mask = 0x01 },
+
+	{ .pin = 25, .byte = 10, .mask = 0x01 },
+	{ .pin = 26, .byte = 10, .mask = 0x02 },
+	{ .pin = 27, .byte = 10, .mask = 0x04 },
+	{ .pin = 28, .byte = 10, .mask = 0x08 },
+	{ .pin = 29, .byte = 10, .mask = 0x10 },
+	{ .pin = 30, .byte = 10, .mask = 0x20 },
+	{ .pin = 31, .byte = 10, .mask = 0x40 },
+	{ .pin = 32, .byte = 10, .mask = 0x80 },
+	{ .pin = 33, .byte = 11, .mask = 0x01 },
+	{ .pin = 34, .byte = 11, .mask = 0x02 },
+	{ .pin = 35, .byte = 11, .mask = 0x04 },
+	{ .pin = 36, .byte = 11, .mask = 0x08 },
+	{ .pin = 37, .byte = 11, .mask = 0x10 },
+	{ .pin = 38, .byte = 11, .mask = 0x20 },
+	{ .pin = 39, .byte = 11, .mask = 0x40 },
+	{ .pin = 40, .byte = 11, .mask = 0x80 }
+
+        // J13?
+};
+
+/* 32 GND Pins. */
+static zif_pins_t gnd_pins[] =
+{
+	{ .pin = 1, .byte = 8, .mask = 0x80 },
+	{ .pin = 2, .byte = 8, .mask = 0x40 },
+	{ .pin = 3, .byte = 8, .mask = 0x20 },
+	{ .pin = 4, .byte = 8, .mask = 0x10 },
+	{ .pin = 5, .byte = 8, .mask = 0x08 },
+	{ .pin = 6, .byte = 8, .mask = 0x04 },
+	{ .pin = 7, .byte = 8, .mask = 0x02 },
+	{ .pin = 8, .byte = 8, .mask = 0x01 },
+	{ .pin = 9, .byte = 9, .mask = 0x80 },
+	{ .pin = 10, .byte = 9, .mask = 0x40 },
+	{ .pin = 11, .byte = 9, .mask = 0x20 },
+	{ .pin = 12, .byte = 9, .mask = 0x10 },
+	{ .pin = 13, .byte = 9, .mask = 0x08 },
+	{ .pin = 14, .byte = 9, .mask = 0x04 },
+	{ .pin = 15, .byte = 9, .mask = 0x02 },
+	{ .pin = 16, .byte = 9, .mask = 0x01 },
+	{ .pin = 18, .byte = 10, .mask = 0x80 },
+	{ .pin = 20, .byte = 10, .mask = 0x40 },
+
+	{ .pin = 25, .byte = 10, .mask = 0x20 },
+	{ .pin = 27, .byte = 10, .mask = 0x10 },
+	{ .pin = 29, .byte = 10, .mask = 0x08 },
+	{ .pin = 30, .byte = 10, .mask = 0x04 },
+	{ .pin = 31, .byte = 10, .mask = 0x02 },
+	{ .pin = 32, .byte = 10, .mask = 0x01 },
+	{ .pin = 33, .byte = 11, .mask = 0x80 },
+	{ .pin = 34, .byte = 11, .mask = 0x40 },
+	{ .pin = 35, .byte = 11, .mask = 0x20 },
+	{ .pin = 36, .byte = 11, .mask = 0x10 },
+	{ .pin = 37, .byte = 11, .mask = 0x08 },
+	{ .pin = 38, .byte = 11, .mask = 0x04 },
+	{ .pin = 39, .byte = 11, .mask = 0x02 },
+	{ .pin = 40, .byte = 11, .mask = 0x01 },
+
+        // J6 and J8 ?
+};
+
+
+/* 56 io pins. */
+
 #ifdef DEBUG_USB_MSG
 static void print_msg(uint8_t *buffer, size_t size)
 {
@@ -885,4 +1001,371 @@ int t48_firmware_update(minipro_handle_t *handle, const char *firmware)
 
 	fprintf(stderr, "Reflash... OK\n");
 	return EXIT_SUCCESS;
+}
+
+#define T48_NPINS 56
+
+static pin_driver_t last_pinstate[T48_NPINS];
+static uint8_t last_direction[T48_NPINS];
+static int last_vcc=0;
+static int last_j1vcc=1;
+
+/************************
+ * Bit banging functions
+ ************************/
+static void set_pin(zif_pins_t *pins, uint8_t size, uint8_t *out, uint8_t pin)
+{
+	int i;
+	for (i = 0; i < size; i++) {
+		if (pins[i].pin == pin) {
+			out[pins[i].byte] |= pins[i].mask;
+		}
+	}
+}
+
+
+int t48_set_zif_direction(minipro_handle_t *handle, uint8_t *zif) {
+	/* Set Direction out on pins command
+	   offset 8     7,20 or 34 or sth else?!? but this is also pin number
+           offset 9     which pin
+           returns number of set pins in offset 8 ?!?
+         */
+	uint8_t msg[48];
+	memset(msg, 0, sizeof(msg));
+
+        int pullup=0;
+	for (int i = 0; i < T48_NPINS; i++)
+          if(zif[i]&0x80) pullup=1;
+
+        int err;
+        if(pullup)
+          err=t48_set_input_and_pullup(handle);
+        else
+          err=t48_set_input_and_pulldown(handle);
+
+	if(err) return err;
+
+	for (int i = 0; i < T48_NPINS; i++) {
+          memset(msg,0,48);
+
+          if(zif[i]&1) {
+            // input - do nothing, all are already input
+
+            last_direction[i]=MP_PIN_DIRECTION_IN;
+          } else {
+            // output
+            last_direction[i]=MP_PIN_DIRECTION_OUT;
+          }
+        }
+
+        return 0;
+}
+
+static int t48_set_gnd_pins(minipro_handle_t *handle,pin_driver_t* pins,int j1gnd) {
+	/* Set GND pins command
+	   offset 8     pin mask
+	   offset 0x10  J6 J8 J16 EGND enable
+	*/
+	uint8_t msg[48];
+	memset(&msg, 0, sizeof(msg));
+	msg[0] = T48_SET_GND_PIN;
+	for (int i = 0; i < T48_NPINS; i++) {
+	  last_pinstate[i].gnd=pins[i].gnd;
+	  if (pins[i].gnd) {
+	    set_pin(gnd_pins,
+		    sizeof(gnd_pins) / sizeof(gnd_pins[0]), msg,
+		    i + 1);
+	  }
+	}
+        msg[0x10]=j1gnd; /* J6 J8 J16 EGND enable */
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+static int t48_set_vpp_pins(minipro_handle_t *handle,pin_driver_t* pins,int j1vpp) {
+	/* Set VPP pins command, sub command 0, sets vpp pins
+	   offset 1    subcommand: 00 is set pins, 01 is set vpp voltage 0-63, 02 is set mcu io voltage 0-4
+	   offset 8-13 pin mask
+	   offset 12   PC5 J1 VPP-enable
+	*/
+	uint8_t msg[48];
+	memset(&msg, 0, sizeof(msg));
+	msg[0] = T48_SET_VPP_PIN;
+	msg[1]=0; /* set vpp pins */
+	for (int i = 0; i < T48_NPINS; i++) {
+	  last_pinstate[i].vpp=pins[i].vpp;
+	  if (pins[i].vpp) {
+	    set_pin(vpp_pins,
+		    sizeof(vpp_pins) / sizeof(vpp_pins[0]), msg,
+		    i + 1);
+	  }
+	}
+        msg[0xc]=j1vpp; /* PC5 J1 VPP-enable */
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+static int t48_set_vcc_voltage_and_pins(minipro_handle_t *handle,int vcc,pin_driver_t* pins,int j1vcc) {
+	/* Set VCC pins command, J13/J14 VCC enable, DAC hold reg and optionally VCC voltage,
+           offset 0x10   J13/J14 VCC enable
+           offset 0x14   DAC hold register. Can not measure voltage if 0x01. Should be sth else? 0x96?
+           offset 0x16   short(!) 1-63 vcc voltage
+         */
+	uint8_t msg[48];
+	memset(&msg, 0, sizeof(msg));
+
+	msg[0] = T48_SET_VCC_PIN;
+	for (int i = 0; i < 40; i++) {
+		last_pinstate[i].vcc=pins[i].vcc;
+		if (pins[i].vcc) {
+			set_pin(vcc_pins,
+				sizeof(vcc_pins) / sizeof(vcc_pins[0]), msg,
+				i + 1);
+		}
+	}
+
+	msg[0x14]=0; /* DAC hold register */
+        last_j1vcc=j1vcc;
+	msg[0x10]=j1vcc; /* J13/J14 VCC enable */
+
+	/* 0 does not change voltage so only save if  */
+        if(vcc) last_vcc=vcc;
+	msg[0x16]=vcc;
+	msg[0x17]=0;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+/* Find voltage in voltage map closest to value and within tolerance volts */
+static int find_voltage(float* voltagemap,int length,float value,float tolerance) {
+  float mind=-1.0;
+  int mini=-1;
+  for(int i=0;i<length;i++) {
+    float v=voltagemap[i];
+    if(v) {
+      float d=fabs(value-v);
+      if(mind==-1 || d<mind) { mind=d; mini=i; }
+    }
+  }
+  if(mini!=-1 && mind<tolerance) return mini;
+  return -1;
+}
+
+/* Note that 0 is not a valid setting. VCC voltage will not be changed if 0 is passed.
+ */
+static float voltagemap_vcc[64]={  0.0, 1.74, 1.83, 1.89, 2.00, 2.07, 2.18, 2.23,
+                                  2.32, 2.41, 2.45, 2.56, 2.65, 2.73, 2.79, 2.90,
+                                  3.02, 3.08, 3.16, 3.28, 3.33, 3.42, 3.48, 3.57,
+                                  3.65, 3.75, 3.84, 3.89, 3.97, 4.08, 4.16, 4.23,
+                                  4.31, 4.40, 4.48, 4.55, 4.65, 4.71, 4.80, 4.88,
+                                  4.97, 5.05, 5.14, 5.18, 5.29, 5.37, 5.45, 5.54,
+                                  5.64, 5.76, 5.81, 5.91, 5.99, 6.06, 6.18, 6.23,
+                                  6.33, 6.37, 6.45, 6.54, 6.62, 6.72, 6.80, 6.86 };
+static int t48_set_vcc_voltage(minipro_handle_t *handle,int vcc) {
+	return t48_set_vcc_voltage_and_pins(handle,vcc,last_pinstate,last_j1vcc);
+}
+int t48_set_vcc_voltagef(minipro_handle_t *handle,float vcc,float tolerance) {
+  int v=find_voltage(voltagemap_vcc,sizeof(voltagemap_vcc)/sizeof(float),vcc,tolerance);
+  if(v!=-1) return t48_set_vcc_voltage(handle,v);
+  return EXIT_FAILURE;
+}
+
+static int t48_set_vcc_pins(minipro_handle_t *handle,pin_driver_t* pins,int j1vcc) {
+	/* pass 0 for voltage in order not to change vcc voltage */
+	return t48_set_vcc_voltage_and_pins(handle,0,pins,j1vcc);
+}
+
+/* approximately 9.31+0.25*vppindex */
+static float voltagemap_vpp[64]={  9.31,  9.56,  9.83, 10.11, 10.32, 10.60, 10.87, 11.14,
+                                  11.32, 11.61, 11.86, 12.15, 12.35, 12.63, 12.90, 13.18,
+                                  13.35, 13.62, 13.88, 14.16, 14.38, 14.66, 14.92, 15.19,
+                                  15.39, 15.65, 15.93, 16.19, 16.43, 16.70, 16.95, 17.23,
+                                  17.22, 17.48, 17.76, 18.04, 18.26, 18.53, 18.80, 19.07,
+                                  19.25, 19.52, 19.80, 20.07, 20.30, 20.56, 20.85, 21.10,
+                                  21.27, 21.56, 21.82, 22.10, 22.31, 22.59, 22.86, 23.13,
+                                  23.32, 23.58, 23.86, 24.13, 24.37, 24.63, 24.90, 25.16 };
+static int t48_set_vpp_voltage(minipro_handle_t *handle,int vpp) {
+	/* Set VPP pins command, sub command 1, with param 0-63 sets vpp voltage
+           offset 1   00 is set pins, 01 is set vpp voltage 0-63, 02 is set mcu io voltage 0-4
+           offset 8   pin-mask or 0-4 for vccio and 0-63 for vpp voltage
+         */
+	uint8_t msg[48];
+	memset(&msg, 0, sizeof(msg));
+	msg[0] = T48_SET_VPP_PIN;
+	msg[1]=1;
+	msg[8]=vpp;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+int t48_set_vpp_voltagef(minipro_handle_t *handle,float vpp,float tolerance) {
+  int v=find_voltage(voltagemap_vpp,sizeof(voltagemap_vpp)/sizeof(float),vpp,tolerance);
+  if(v!=-1) return t48_set_vpp_voltage(handle,v);
+  return EXIT_FAILURE;
+}
+
+
+static float voltagemap_vccio[5]={ 2.35, 2.47, 2.93, 3.23, 3.45 };
+
+static int t48_set_vccio_voltage(minipro_handle_t *handle,int vccio) {
+	/* Set VPP pins command, sub command 2, with param 0-4 set vccio voltage
+           offset 1   00 is set pins, 01 is set vpp voltage 0-63, 02 is set mcu io voltage 0-4
+           offset 8   pin-mask or 0-4 for vccio and 0-63 for vpp voltage
+         */
+	uint8_t msg[48];
+	memset(&msg, 0, sizeof(msg));
+	msg[0] = T48_SET_VPP_PIN;
+	msg[1]=2;
+	msg[8]=vccio;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+int t48_set_vccio_voltagef(minipro_handle_t *handle,float vccio,float tolerance) {
+  int v=find_voltage(voltagemap_vccio,sizeof(voltagemap_vccio)/sizeof(float),vccio,tolerance);
+  if(v!=-1) return t48_set_vccio_voltage(handle,v);
+  return EXIT_FAILURE;
+}
+
+
+
+
+
+
+
+int t48_reset_state(minipro_handle_t *handle)
+{
+	uint8_t msg[48];
+	memset(msg, 0, sizeof(msg));
+	/* Reset pin drivers state */
+	msg[0] = T48_RESET_PIN_DRIVERS;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+
+int t48_set_input_and_pullup(minipro_handle_t *handle)
+{
+  /* Sets all pins to input and with pull down active
+   */
+	uint8_t msg[48];
+	memset(msg, 0, sizeof(msg));
+	/* Reset pin drivers state */
+	msg[0] = T48_SET_PULLUPS;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+int t48_set_input_and_pulldown(minipro_handle_t *handle)
+{
+  /* Sets all pins to input and with pull up active
+   */
+	uint8_t msg[48];
+	memset(msg, 0, sizeof(msg));
+	/* Reset pin drivers state */
+	msg[0] = T48_SET_PULLDOWNS;
+	return msg_send(handle->usb_handle, msg, sizeof(msg));
+}
+
+/*
+    Returns reading from ADC for VPP, VUSB, VCC and VCCIO scaled by VUSB
+    in float[4] array if passed.
+ */
+int t48_measure_voltages(minipro_handle_t* handle,float* voltages) {
+	uint8_t msg[24];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_MEASURE_VOLTAGES;
+	//msg[8] = 1;
+	//msg[10] = 1;
+	int err=msg_send(handle->usb_handle, msg, 16);
+	if(err) return err;
+	err=msg_recv(handle->usb_handle, msg, sizeof(msg));
+        if(err) return EXIT_FAILURE;
+	uint32_t vpp=load_int(&(msg[ 8]), 2, MP_LITTLE_ENDIAN)* 0xf78/0x1000;
+	uint32_t vusb=load_int(&(msg[12]), 2, MP_LITTLE_ENDIAN)*0xccf6/0x27000;
+	uint32_t vcc=load_int(&(msg[16]), 2, MP_LITTLE_ENDIAN)*0xb32e/0x27000-0x14;
+	uint32_t vccio=load_int(&(msg[20]), 2, MP_LITTLE_ENDIAN)* 0x294/0x1000;
+	if(voltages) {
+	  voltages[0]=vpp/100.0;
+	  voltages[1]=vusb/100.0;
+	  voltages[2]=vcc/100.0;
+	  voltages[3]=vccio/100.0;
+	}
+	return err;
+}
+
+/*
+    Uses set pin output
+    Setting out on a pin sets direction of that pin to output so we must never
+    do T48_SET_OUT on a configured input.
+ */
+int t48_set_zif_state(minipro_handle_t *handle, uint8_t *zif)
+{
+	uint8_t msg[8];
+	memset(msg, 0, sizeof(msg));
+	for (int i = 0; i < T48_NPINS; i++) {
+          if(last_direction[i]==MP_PIN_DIRECTION_OUT) {
+            msg[0] = T48_SET_OUT;
+            msg[1] = zif[i];
+            msg[4] = i;
+            if (msg_send(handle->usb_handle, msg, 8))
+              return EXIT_FAILURE;
+          }
+	}
+
+	return EXIT_SUCCESS;
+}
+
+
+int t48_get_zif_state(minipro_handle_t *handle, uint8_t *zif)
+{
+	// Byte 8-14 is response with pin 1 in lsb of byte 8.
+	uint8_t msg[48];
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_READ_PINS;
+	if (msg_send(handle->usb_handle, msg, 8))
+		return EXIT_FAILURE;
+	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
+		return EXIT_FAILURE;
+	for(int i=0;i<T48_NPINS;i++) zif[i]=(msg[8+(i>>3)]>>(i&7))&1;
+	return EXIT_SUCCESS;
+}
+
+int t48_screen_voltages(minipro_handle_t *handle) {
+	float voltages[4];
+	for(int i=0;i<64;i++) {
+	  t48_set_vpp_voltage(handle,i);
+          /* It takes max 450ms for vpp voltage to settle without load */
+          usleep(450000);
+	  t48_measure_voltages(handle,voltages);
+	  printf("vpp %2d is %.2fV\n",i,voltages[0]);
+	}
+	for(int i=0;i<5;i++) {
+	  t48_set_vccio_voltage(handle,i);
+          /* No measurable settling time for vccio here so no sleep needed */
+	  t48_measure_voltages(handle,voltages);
+	  printf("vccio %2d is %.2fV\n",i,voltages[3]);
+	}
+	for(int i=0;i<64;i++) {
+          /* note that 0 will NOT set voltage */
+	  t48_set_vcc_voltage(handle,i);
+          /* It takes max 600ms for vcc voltage to settle without load */
+          usleep(600000);
+	  t48_measure_voltages(handle,voltages);
+	  printf("vcc %2d is %.2fV\n",i,voltages[2]);
+	}
+	printf("USB voltage %.2f\n",voltages[1]);
+	return EXIT_SUCCESS;
+}
+
+int t48_set_voltages(minipro_handle_t *handle, uint8_t vcc, uint8_t vpp)
+{
+	int err=t48_set_vcc_voltage(handle,vcc);
+	if(err) return err;
+	return t48_set_vpp_voltage(handle,vpp);
+}
+
+int t48_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
+{
+	/* Set GND pins */
+        int err=t48_set_gnd_pins(handle,pins,1);
+	if(err) return err;
+	/* Set VCC pins */
+        err=t48_set_vcc_pins(handle,pins,1);
+	if(err) return err;
+	/* Set VPP pins */
+        return t48_set_vpp_pins(handle,pins,1);
 }

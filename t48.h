@@ -47,4 +47,16 @@ int t48_read_jedec_row(minipro_handle_t *handle, uint8_t *buffer,
 			       uint8_t row, uint8_t flags, size_t size);
 int t48_logic_ic_test(minipro_handle_t *handle);
 int t48_firmware_update(minipro_handle_t *handle, const char *firmware);
+
+int t48_reset_state(minipro_handle_t *handle);
+int t48_set_zif_direction(minipro_handle_t *handle, uint8_t *zif);
+int t48_set_zif_state(minipro_handle_t *handle, uint8_t *zif);
+int t48_get_zif_state(minipro_handle_t *handle, uint8_t *zif);
+int t48_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins);
+int t48_set_voltages(minipro_handle_t *handle, uint8_t vcc, uint8_t vpp);
+
+
+int t48_set_input_and_pullup(minipro_handle_t *handle);
+int t48_set_input_and_pulldown(minipro_handle_t *handle);
+
 #endif

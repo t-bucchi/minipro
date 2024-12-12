@@ -397,6 +397,12 @@ minipro_handle_t *minipro_open(uint8_t verbose)
 		handle->minipro_write_jedec_row = t48_write_jedec_row;
 		handle->minipro_firmware_update = t48_firmware_update;
 		handle->minipro_logic_ic_test = t48_logic_ic_test;
+		handle->minipro_reset_state = t48_reset_state;
+		handle->minipro_set_zif_direction = t48_set_zif_direction;
+		handle->minipro_set_zif_state = t48_set_zif_state;
+		handle->minipro_get_zif_state = t48_get_zif_state;
+		handle->minipro_set_pin_drivers = t48_set_pin_drivers;
+		handle->minipro_set_voltages = t48_set_voltages;
 		break;
 	case MP_T56:
 		handle->minipro_begin_transaction = t56_begin_transaction;
