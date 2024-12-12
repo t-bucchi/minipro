@@ -41,9 +41,9 @@ else
         GIT_DATE = "$Format:%ci$"
 endif
 BUILD_DATE = $(shell date "+%Y-%m-%d %H:%M:%S %z")
-VERSION_HEADER = version.h
-VERSION_STRINGS = version.c
-VERSION_OBJ = version.o
+VERSION_HEADER = src/version.h
+VERSION_STRINGS = src/version.c
+VERSION_OBJ = src/version.o
 
 PKG_CONFIG := $(shell which pkg-config 2>/dev/null)
 ifeq ($(PKG_CONFIG),)
@@ -51,16 +51,17 @@ ifeq ($(PKG_CONFIG),)
 endif
 
 ifeq ($(OS),Windows_NT)
-    USB = usb_win.o
+    USB = src/usb_win.o
 else
-    USB = usb_nix.o
+    USB = src/usb_nix.o
 endif
 
-COMMON_OBJECTS=xml.o jedec.o ihex.o srec.o database.o bitbang.o prom.o \
-               minipro.o tl866a.o tl866iiplus.o t48.o t56.o version.o $(USB)
-OBJECTS=$(COMMON_OBJECTS) main.o
+COMMON_OBJECTS=src/xml.o src/jedec.o src/ihex.o src/srec.o src/database.o \
+		src/bitbang.o src/prom.o src/minipro.o src/tl866a.o \
+		src/tl866iiplus.o src/t48.o src/t56.o src/version.o $(USB)
+OBJECTS=$(COMMON_OBJECTS) src/main.o
 PROGS=minipro
-STATIC_LIB=libminipro.a
+STATIC_LIB=src/libminipro.a
 MINIPRO=minipro
 INFOIC=infoic.xml
 LOGICIC=logicic.xml
@@ -124,8 +125,8 @@ $(VERSION_STRINGS):
 
 $(OBJECTS): $(VERSION_HEADER)
 
-minipro: $(VERSION_STRINGS) $(COMMON_OBJECTS) main.o
-	$(CC) $(LDFLAGS) $(COMMON_OBJECTS) main.o $(LIBS) -o $(MINIPRO)
+minipro: $(VERSION_STRINGS) $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $(MINIPRO)
 
 library: $(VERSION_STRINGS) $(COMMON_OBJECTS)
 	ar ru $(STATIC_LIB) $(VERSION_OBJ) $(COMMON_OBJECTS)
@@ -134,7 +135,7 @@ library: $(VERSION_STRINGS) $(COMMON_OBJECTS)
 clean:
 	rm -f $(OBJECTS) $(PROGS)
 	rm -f $(STATIC_LIB)
-	rm -f version.h version.c version.o
+	rm -f src/version.h src/version.c src/version.o
 
 distclean: clean
 	rm -rf $(DIST_DIR)*
