@@ -1,7 +1,7 @@
 .TH MINIPRO 1 "21 September 2024 (v0.7.2)"
 .SH NAME
 minipro \- A free and open command-line program for controlling chip
-programmers by Autoelectric / Xgecu.
+programmers by Xgecu.
 
 .SH DESCRIPTION
 .I minipro
@@ -28,7 +28,7 @@ List devices like this.
 .B \-q, --programmer <version>
 Force a programmer version when listing devices.
 .br
-Possible values (case insensitive): TL866A TL866II T48.
+Possible values (case insensitive): TL866A TL866II T48 T56.
 
 .TP
 .B \-Q, \--query_supported
@@ -213,7 +213,7 @@ Set custom logicic.xml file.
 
 .TP
 .B \--algorithms <filename>
-Set custom algorithm.xml file.
+Set custom algorithm.xml file.  See ALGORITHMS below.
 
 .TP
 .B \-h, \--help
@@ -274,9 +274,7 @@ Use
 .B \-d <device>
 to view if those options are supported.
 
-
 .SH NOTES ON FILE FORMATS
-
 If the
 .B \-f
 or
@@ -300,10 +298,31 @@ or
 options.  The exact Intel hex format (ihex8, ihex16, or ihex32) are also
 automatically detected.
 
+.SH ALGORITHMS
+All the Xgecu programmers contain an FPGA chip (Field Programmable Gate
+Array) which does most of the low-level work of reading and writing
+various chips.  These FPGAs require bitstreams (algorithms) to be loaded
+before they're able to do any work.  The TL866A/CS, TL866II+, and T48
+keep their algorithms on a memory chip on the programmer's circuit
+boards and are updated whenever the programmer's firmware is updated.
+The T56 is different in that it requires its algorithms to be loaded
+from the controlling program.  Those algorithms are installed by the
+official Xgecu software to the host computer.  Because of the copyright
+on that package, the algorithms cannot be included in the minipro
+distribution.
+
+To allow
+.I minipro
+to get needed algorithms into a T58 programmer, a script,
+"dump-alg.bash", is provided to download a copy of the official Xgecu
+software, extract the algorithms, and pack those data into
+"algorithm.xml".  This file is intended to be installed to
+.I minipro's
+share directory.
 
 .SH UPDATING FIRMWARE
 Firmware update files can be obtained from the manufacturer's website:
-http://www.autoelectric.cn.
+http://www.xgecu.com/en/.
 .br
 They can also be downloaded and extracted from the following repository:
 https://github.com/Kreeblah/XGecu_Software.
@@ -311,6 +330,10 @@ https://github.com/Kreeblah/XGecu_Software.
 For the TL866A/CS, use the "update.dat" file.
 .br
 For the TL866IOI+, use the "updateII.dat" file.
+.br
+For the T48, use the "UpdateT48.dat" file.
+.br
+For the T56, use the "updateT56.dat" file.
 
 .TP
 .B \-F <filename>
@@ -318,7 +341,6 @@ Update firmware.
 .B minipro
 will verify the firmware file and ask if you wish to proceed with
 writing the file to the programmer.
-
 
 .SH NOTES ON MEMORY TYPES
 If
@@ -455,16 +477,15 @@ The TL866A and TL866CS programmers appear to have a firmware bug such
 that if not quite enough current is provided to them from a USB port,
 then the programmer will fail to initialize itself or reset itself after
 an operation.  This problem seems to go hand-in-hand with newer USB 3.0
-/ xHCI ports.  This problem can be avoided by using a powered hub.
+/ xHCI ports and can be avoided by using a powered hub.
 
 .SH AUTHOR
 .I minipro
-was written by Valentin Dudouyt and is copyright 2014.  Many others
-have contributed code and bug reports.  Development is currently coordinated
-by David Griffith.
+was created by Valentin Dudouyt in 2014.  Many others have contributed
+code and bug reports.  Development is currently coordinated by David
+Griffith.
 
 .SH HARDWARE
-
 The TL866A/CS, TL866II+, T48, and T56 chip programmers are distributed by
 Xgecu, formerly Autoelectric.  Its website is
 .BR http://www.xgecu.com/en/.
