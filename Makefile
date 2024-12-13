@@ -66,6 +66,8 @@ MINIPRO=minipro
 INFOIC=infoic.xml
 LOGICIC=logicic.xml
 ALGORITHM=algorithm.xml
+DUMP_ALG=dump-alg.bash
+
 TESTS=$(wildcard tests/test_*.c);
 OBJCOPY?=objcopy
 
@@ -135,32 +137,30 @@ library: $(VERSION_STRINGS) $(COMMON_OBJECTS)
 clean:
 	rm -f $(OBJECTS) $(PROGS)
 	rm -f $(STATIC_LIB)
+	rm -f $(ALGORITHM)
+	rm -f firmware*.dat
 	rm -f src/version.h src/version.c src/version.o
+	rm -rf algorithm
 
 distclean: clean
+	rm -f *.rar
 	rm -rf $(DIST_DIR)*
+
+algorithm: $(ALGORITHM)
+$(ALGORITHM):
+	@./$(DUMP_ALG)
+
+install-algorithm: algorithm
+	cp $(ALGORITHM) $(SHARE_INSTDIR)
 
 install:
 	mkdir -p $(BIN_INSTDIR)
 	mkdir -p $(MAN_INSTDIR)
 	mkdir -p $(SHARE_INSTDIR)
 	cp $(MINIPRO) $(BIN_INSTDIR)/
+	cp $(DUMP_ALG) $(BIN_INSTDIR)/
 	cp $(INFOIC) $(SHARE_INSTDIR)/
 	cp $(LOGICIC) $(SHARE_INSTDIR)/
-
-	@if [ ! -f "$(ALGORITHM)" ]; then \
-		echo "" ; \
-		echo "**************************************************************"; \
-		echo "**************************************************************"; \
-		echo "*** $(ALGORITHM) is missing.  T56 functionality is disabled."; \
-		echo "*** This file cannot be included with this package."; \
-		echo "*** Later on this file will be automatically downloaded."; \
-		echo "**************************************************************"; \
-		echo "**************************************************************"; \
-		echo ""; \
-	else \
-		cp $(ALGORITHM) $(SHARE_INSTDIR)/; \
-	fi
 
 	cp man/minipro.1 $(MAN_INSTDIR)/
 	if [ -n "$(UDEV_DIR)" ]; then \
@@ -215,4 +215,4 @@ else
 endif
 
 
-.PHONY: all dist distclean clean install test version-info
+.PHONY: all dist distclean clean install install-algorithm test version-info
