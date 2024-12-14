@@ -643,6 +643,8 @@ int t56_logic_ic_test(minipro_handle_t *handle)
 	} else if (!(second_step = do_ic_test(handle, 1))) { /* Pull-down active */
 		fprintf(stderr,
 			"Error running the second step of logic test.\n");
+	} else if (handle->cmdopts->logicic_out) {
+		ret = write_logic_file(handle, first_step, second_step);
 	} else {
 		int errors = 0, err;
 		static const char pst[] = "01LHCZXGV";
