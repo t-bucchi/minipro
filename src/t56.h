@@ -18,8 +18,8 @@
 #ifndef __T56_H
 #define __T56_H
 
-#define T56_FIRMWARE_VERSION 0x147
-#define T56_FIRMWARE_STRING  "01.1.71"
+#define T56_FIRMWARE_VERSION 0x148
+#define T56_FIRMWARE_STRING  "01.1.72"
 
 /* T56 low level functions. */
 int t56_begin_transaction(minipro_handle_t *handle);
