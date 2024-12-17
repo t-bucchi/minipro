@@ -1040,7 +1040,7 @@ void parse_cmdline(int argc, char **argv, cmdopts_t *cmdopts)
 			"-L, -l or -d command is required for this action.\n");
 		print_help_and_exit(argv[0]);
 	}
-	if (p_func)
+	if (p_func != NULL)
 		p_func(cmdopts);
 	if (package_type)
 		spi_autodetect_and_exit(package_type, cmdopts);
