@@ -24,7 +24,8 @@
 #include <ctype.h>
 #include <errno.h>
 #include <zlib.h>
-#include <b64/cdecode.h>
+#include "b64/cencode.h"
+#include "b64/cdecode.h"
 #include "xml.h"
 #include "database.h"
 
