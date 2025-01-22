@@ -150,7 +150,7 @@ The final RPMs can be found below `~/rpmbuild/RPMS/`
 
 ## Installation on macOS
 
-The easiest way to install on macOS is by using brew to install the most recent release:
+The easiest way to install on macOS is by using [homebrew](https://brew.sh/) to install the most recent release:
 
 ```nohighlight
 brew install minipro
