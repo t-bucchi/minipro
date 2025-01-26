@@ -1293,7 +1293,8 @@ static uint8_t *do_ic_test(minipro_handle_t *handle)
 						break;
 					case LOGIC_C:
 						dir[zif_pin] = 0x00;
-						out[zif_pin] = 0x00;
+						/* In the first sm state clock pin should retain
+						 * its previous value */
 						break;
 					default:
 						dir[zif_pin] = 0x01;
@@ -1313,20 +1314,11 @@ static uint8_t *do_ic_test(minipro_handle_t *handle)
 						return NULL;
 					}
 				} else {
-					/* State machine 2 and 3; Toggle
-					 * the clock lines only.
-					 * The TL866II firmware will skip
-					 * the clock pulse if the previous
-					 * test item was set to '1'
+					/* State machine 2 and 3;
+					 * Clock lines should go through 1 and 0.
 					 */
-					if (value == LOGIC_C &&
-					    !(v &&
-					      handle->device->vectors
-							      [(v -
-								1) * pin_count +
-							       pin] ==
-						      LOGIC_1)) {
-						out[zif_pin] ^= 0x01;
+					if (value == LOGIC_C) {
+						out[zif_pin] = (sm == 1) ? 0x01 : 0x00;
 						/* Set pin state */
 						if (msg_send(handle->usb_handle,
 							     out,
