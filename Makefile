@@ -101,7 +101,8 @@ ifneq ($(OS),Windows_NT)
 else
 # Add Windows libs here
 override LIBS += -lsetupapi \
-                 -lwinusb
+                 -lwinusb \
+				 -lz
 endif
 
 
