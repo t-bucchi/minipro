@@ -117,7 +117,7 @@ static zif_pins_t vpp_pins[] =
 	{ .pin = 41, .byte = 12, .mask = 0x01 }
 };
 
-/* 33 VCC Pins. */
+/* 34 VCC Pins. */
 static zif_pins_t vcc_pins[] =
 {
 	{ .pin = 1, .byte = 8, .mask = 0x01 },
@@ -160,7 +160,7 @@ static zif_pins_t vcc_pins[] =
 	{ .pin = 54, .byte = 16, .mask = 0x02 }
 };
 
-/* 32 GND Pins. */
+/* 35 GND Pins. */
 static zif_pins_t gnd_pins[] =
 {
 	{ .pin = 1, .byte = 8, .mask = 0x80 },
