@@ -67,6 +67,12 @@ make
 sudo make install
 ```
 
+If you have a T56, you'll need to download and install algorithms from
+Xgeku's official software package.
+```nohighlight
+sudo make install-algorithm
+```
+
 ### Udev configuration (recommended)
 If you want to access the programmer as a regular user, you'll have to
 configure udev to recognize the programmer and set appropriate access

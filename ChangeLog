@@ -1,3 +1,27 @@
+Summary of changes between minipro 0.7.2 and minipro 0.7.3
+==========================================================
+
+Minipro 0.7.3 was released on xxx xxx, 2025
+
+NEW FEATURES
+
+- Added a script to download an official Xgecu package and distill the
+  individual algorithm files to a single "algorithm.xml" file for use
+  with the T56 programmer.
+
+- Added firmware update capability for the T48 and T56 programmers.
+
+
+BUG FIXES
+
+- Corrected wrong code_memory_size for some old PROMs.
+
+NOTES
+
+- Algorithms (FPGA bitstreams) are not included with this package to
+  avoid copyright complications.
+
+
 Summary of changes between minipro 0.7.1 and minipro 0.7.2
 ==========================================================
 
