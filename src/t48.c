@@ -91,7 +91,7 @@ typedef struct zif_pins_s {
 } zif_pins_t;
 
 /* clang-format off */
-/* 21 VPP pins. */
+/* 17 VPP pins. */
 static zif_pins_t vpp_pins[] =
 {
 	{ .pin = 31, .byte = 8, .mask = 0x01 },
@@ -110,12 +110,14 @@ static zif_pins_t vpp_pins[] =
 	{ .pin = 37, .byte = 9, .mask = 0x10 },
 	{ .pin = 38, .byte = 9, .mask = 0x20 },
 	{ .pin = 39, .byte = 9, .mask = 0x40 },
-	{ .pin = 40, .byte = 9, .mask = 0x80 }
+	{ .pin = 40, .byte = 9, .mask = 0x80 },
 
-        // J1?
+        /* J1 */
+
+	{ .pin = 41, .byte = 12, .mask = 0x01 }
 };
 
-/* 32 VCC Pins. */
+/* 33 VCC Pins. */
 static zif_pins_t vcc_pins[] =
 {
 	{ .pin = 1, .byte = 8, .mask = 0x01 },
@@ -150,9 +152,12 @@ static zif_pins_t vcc_pins[] =
 	{ .pin = 37, .byte = 11, .mask = 0x10 },
 	{ .pin = 38, .byte = 11, .mask = 0x20 },
 	{ .pin = 39, .byte = 11, .mask = 0x40 },
-	{ .pin = 40, .byte = 11, .mask = 0x80 }
+	{ .pin = 40, .byte = 11, .mask = 0x80 },
 
-        // J13?
+        /* J13 */
+	{ .pin = 53, .byte = 16, .mask = 0x01 },
+        /* J14 */
+	{ .pin = 54, .byte = 16, .mask = 0x02 }
 };
 
 /* 32 GND Pins. */
@@ -192,7 +197,12 @@ static zif_pins_t gnd_pins[] =
 	{ .pin = 39, .byte = 11, .mask = 0x02 },
 	{ .pin = 40, .byte = 11, .mask = 0x01 },
 
-        // J6 and J8 ?
+        /* J6 */
+	{ .pin = 46, .byte = 16, .mask = 0x01 },
+        /* J8 */
+	{ .pin = 48, .byte = 16, .mask = 0x02 },
+        /* J16 */
+	{ .pin = 56, .byte = 16, .mask = 0x04 }
 };
 
 
@@ -1415,7 +1425,7 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 		fprintf(stderr, "%s pin %u state is %s\n", name, pin->pin, pin_ok ? "Good" : "Bad");
 		/* Check all other pins do *not* match expected value */
 		for (j = 0; j < T48_NPINS; j++) {
-			if (j == pin->pin - 1) 
+			if (j == pin->pin - 1)
 				continue;
 			/* Skip unconnected J1 pins */
 			if (j == 51 || j == 53 || j == 55)
