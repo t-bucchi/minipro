@@ -59,4 +59,6 @@ int t48_set_voltages(minipro_handle_t *handle, uint8_t vcc, uint8_t vpp);
 int t48_set_input_and_pullup(minipro_handle_t *handle);
 int t48_set_input_and_pulldown(minipro_handle_t *handle);
 
+int t48_hardware_check(minipro_handle_t *handle);
+
 #endif

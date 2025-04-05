@@ -1375,3 +1375,69 @@ int t48_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
 	/* Set VPP pins */
         return t48_set_vpp_pins(handle,pins,1);
 }
+
+static int zif_pin_state(uint8_t *msg, uint8_t pin)
+{
+	return (msg[8+(pin>>3)]>>(pin&7))&1;
+}
+
+static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif_pins_t *pins, size_t npins)
+{
+	int i, j;
+	uint8_t check_level;
+	zif_pins_t *pin;
+	uint8_t msg[64];
+	if (t48_reset_state(handle))
+		return EXIT_FAILURE;
+	/* If testing GND set pullups and check level 0 otherwise pulldowns and 1 */
+	if (cmd == T48_SET_GND_PIN) {
+		if (t48_set_input_and_pullup(handle))
+			return EXIT_FAILURE;
+		check_level = 0;
+	} else {
+		if (t48_set_input_and_pulldown(handle))
+			return EXIT_FAILURE;
+		check_level = 1;
+	}
+	fprintf(stderr, "Testing %d %s pins\n", (int)npins, name);
+	for (i = 0, pin = pins; i < npins; i++, pin++) {
+		memset(msg, 0, sizeof(msg));
+		msg[0] = cmd;
+		msg[pin->byte] = pin->mask;
+		if (msg_send(handle->usb_handle, msg, 64))
+			return EXIT_FAILURE;
+		msg[0] = T48_READ_PINS;
+		if (msg_send(handle->usb_handle, msg, 8))
+			return EXIT_FAILURE;
+		if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
+			return EXIT_FAILURE;
+		int pin_ok = zif_pin_state(msg, pin->pin - 1) == check_level;
+		fprintf(stderr, "%s pin %u state is %s\n", name, pin->pin, pin_ok ? "Good" : "Bad");
+		/* Check all other pins do *not* match expected value */
+		for (j = 0; j < T48_NPINS; j++) {
+			if (j == pin->pin - 1) 
+				continue;
+			/* Skip unconnected J1 pins */
+			if (j == 51 || j == 53 || j == 55)
+				continue;
+			if (zif_pin_state(msg, j) == check_level) {
+				fprintf(stderr, "Unexpected state of pin %u when testing %s pin %u: shorted?\n",
+												j + 1, name, pin->pin);
+			}
+		}
+	}
+	return EXIT_SUCCESS;
+}
+
+
+/* Minipro hardware check */
+int t48_hardware_check(minipro_handle_t *handle)
+{
+	if (t48_check_pins(handle, "VPP", T48_SET_VPP_PIN, vpp_pins, sizeof(vpp_pins)/sizeof(zif_pins_t)))
+		return EXIT_FAILURE;
+	if (t48_check_pins(handle, "VCC", T48_SET_VCC_PIN, vcc_pins, sizeof(vcc_pins)/sizeof(zif_pins_t)))
+		return EXIT_FAILURE;
+	if (t48_check_pins(handle, "GND", T48_SET_GND_PIN, gnd_pins, sizeof(gnd_pins)/sizeof(zif_pins_t)))
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
