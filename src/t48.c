@@ -1391,7 +1391,16 @@ static int zif_pin_state(uint8_t *msg, uint8_t pin)
 	return (msg[8+(pin>>3)]>>(pin&7))&1;
 }
 
-static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif_pins_t *pins, size_t npins)
+/* Return 1 if ZIF/ICSP pin has no I/O pin associated with it */
+static int zif_no_io(uint8_t pin)
+{
+	if (pin == 51 || pin == 53 || pin == 55)
+		return 1;
+	return 0;
+}
+
+static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif_pins_t *pins, size_t npins,
+				int *perr)
 {
 	int i, j;
 	uint8_t check_level;
@@ -1421,18 +1430,23 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 			return EXIT_FAILURE;
 		if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
 			return EXIT_FAILURE;
-		int pin_ok = zif_pin_state(msg, pin->pin - 1) == check_level;
-		fprintf(stderr, "%s pin %u state is %s\n", name, pin->pin, pin_ok ? "Good" : "Bad");
+		if (!zif_no_io(pin->pin - 1)) {
+			int pin_ok = zif_pin_state(msg, pin->pin - 1) == check_level;
+			fprintf(stderr, "%s pin %u state is %s\n", name, pin->pin, pin_ok ? "Good" : "Bad");
+			if (!pin_ok)
+				(*perr)++;
+		}
 		/* Check all other pins do *not* match expected value */
 		for (j = 0; j < T48_NPINS; j++) {
 			if (j == pin->pin - 1)
 				continue;
 			/* Skip unconnected J1 pins */
-			if (j == 51 || j == 53 || j == 55)
+			if (zif_no_io(j))
 				continue;
 			if (zif_pin_state(msg, j) == check_level) {
 				fprintf(stderr, "Unexpected state of pin %u when testing %s pin %u: shorted?\n",
 												j + 1, name, pin->pin);
+				(*perr)++;
 			}
 		}
 	}
@@ -1443,11 +1457,17 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 /* Minipro hardware check */
 int t48_hardware_check(minipro_handle_t *handle)
 {
-	if (t48_check_pins(handle, "VPP", T48_SET_VPP_PIN, vpp_pins, sizeof(vpp_pins)/sizeof(zif_pins_t)))
+	int nerr = 0;
+	if (t48_check_pins(handle, "VPP", T48_SET_VPP_PIN, vpp_pins, sizeof(vpp_pins)/sizeof(zif_pins_t), &nerr))
 		return EXIT_FAILURE;
-	if (t48_check_pins(handle, "VCC", T48_SET_VCC_PIN, vcc_pins, sizeof(vcc_pins)/sizeof(zif_pins_t)))
+	if (t48_check_pins(handle, "VCC", T48_SET_VCC_PIN, vcc_pins, sizeof(vcc_pins)/sizeof(zif_pins_t), &nerr))
 		return EXIT_FAILURE;
-	if (t48_check_pins(handle, "GND", T48_SET_GND_PIN, gnd_pins, sizeof(gnd_pins)/sizeof(zif_pins_t)))
+	if (t48_check_pins(handle, "GND", T48_SET_GND_PIN, gnd_pins, sizeof(gnd_pins)/sizeof(zif_pins_t), &nerr))
 		return EXIT_FAILURE;
+
+	if (nerr)
+		fprintf(stderr, "\nHardware test completed with %u error(s).\007\n", nerr);
+	else
+		fprintf(stderr, "\nHardware test completed successfully!\n");
 	return EXIT_SUCCESS;
 }
