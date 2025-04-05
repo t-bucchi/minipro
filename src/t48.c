@@ -204,7 +204,10 @@ static zif_pins_t gnd_pins[] =
         /* J16 */
 	{ .pin = 56, .byte = 16, .mask = 0x04 }
 };
-
+/* Indices to pin 1 for OVC tests */
+#define VPP1	7
+#define VCC1	0
+#define GND1	0
 
 /* 56 io pins. */
 
