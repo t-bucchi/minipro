@@ -70,8 +70,8 @@
 #define T48_SET_VCC_PIN		 0x2E
 #define T48_SET_VPP_PIN		 0x2F
 #define T48_SET_GND_PIN		 0x30
-#define T48_SET_PULLDOWNS	 0x31
-#define T48_SET_PULLUPS		 0x32
+#define T48_SET_PULLUPS		 0x31
+#define T48_SET_PULLDOWNS	 0x32
 #define T48_MEASURE_VOLTAGES	 0x33
 #define T48_READ_PINS		 0x35
 #define T48_SET_OUT		 0x36
