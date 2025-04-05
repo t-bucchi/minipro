@@ -1475,11 +1475,80 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 int t48_hardware_check(minipro_handle_t *handle)
 {
 	int nerr = 0;
+	uint8_t msg[64];
 	if (t48_check_pins(handle, "VPP", T48_SET_VPP_PIN, vpp_pins, sizeof(vpp_pins)/sizeof(zif_pins_t), &nerr))
 		return EXIT_FAILURE;
+	fprintf(stderr, "\n");
 	if (t48_check_pins(handle, "VCC", T48_SET_VCC_PIN, vcc_pins, sizeof(vcc_pins)/sizeof(zif_pins_t), &nerr))
 		return EXIT_FAILURE;
+	fprintf(stderr, "\n");
 	if (t48_check_pins(handle, "GND", T48_SET_GND_PIN, gnd_pins, sizeof(gnd_pins)/sizeof(zif_pins_t), &nerr))
+		return EXIT_FAILURE;
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_RESET_PIN_DRIVERS;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	msg[0] = T48_SET_GND_PIN;
+	msg[gnd_pins[GND1].byte] = gnd_pins[GND1].mask;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_SET_VPP_PIN;
+	msg[vpp_pins[VPP1].byte] = vpp_pins[VPP1].mask;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_READ_PINS;
+	if (msg_send(handle->usb_handle, msg, 8))
+		return EXIT_FAILURE;
+	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
+		return EXIT_FAILURE;
+
+	fprintf(stderr, "\n");
+	if (msg[1]) {
+		fprintf(stderr, "VPP overcurrent protection is OK.\n");
+	} else {
+		fprintf(stderr, "VPP overcurrent protection failed!\007\n");
+		nerr++;
+	}
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_RESET_PIN_DRIVERS;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	msg[0] = T48_SET_GND_PIN;
+	msg[gnd_pins[GND1].byte] = gnd_pins[GND1].mask;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_SET_VCC_PIN;
+	msg[vcc_pins[VCC1].byte] = vcc_pins[VCC1].mask;
+	if (msg_send(handle->usb_handle, msg, 10))
+		return EXIT_FAILURE;
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_READ_PINS;
+	if (msg_send(handle->usb_handle, msg, 8))
+		return EXIT_FAILURE;
+	if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
+		return EXIT_FAILURE;
+
+	if (msg[1]) {
+		fprintf(stderr, "VCC overcurrent protection is OK.\n");
+	} else {
+		fprintf(stderr, "VCC overcurrent protection failed!\007\n");
+		nerr++;
+	}
+
+	memset(msg, 0, sizeof(msg));
+	msg[0] = T48_RESET_PIN_DRIVERS;
+	if (msg_send(handle->usb_handle, msg, 10))
 		return EXIT_FAILURE;
 
 	if (nerr)
