@@ -1430,6 +1430,20 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 			return EXIT_FAILURE;
 		if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
 			return EXIT_FAILURE;
+		if (msg[1]) {
+			msg[0] = T48_RESET_PIN_DRIVERS;
+			if (msg_send(handle->usb_handle, msg, 10)) {
+				return EXIT_FAILURE;
+			}
+			if (minipro_end_transaction(handle)) {
+				return EXIT_FAILURE;
+			}
+			fprintf(stderr,
+				"Overcurrent protection detected while testing %s pin driver "
+				"%u!\007\n",
+				name, pin->pin);
+			return EXIT_FAILURE;
+		}
 		if (!zif_no_io(pin->pin - 1)) {
 			int pin_ok = zif_pin_state(msg, pin->pin - 1) == check_level;
 			fprintf(stderr, "%s pin %u state is %s\n", name, pin->pin, pin_ok ? "Good" : "Bad");
