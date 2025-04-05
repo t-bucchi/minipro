@@ -700,7 +700,14 @@ int tl866a_hardware_check(minipro_handle_t *handle)
 	fprintf(stderr, "\n");
 	/* Testing 25 GND pin drivers */
 	for (i = 0; i < 25; i++) {
+		/* Reset pin drivers and enable pullups */
+		msg[0] = TL866A_RESET_PIN_DRIVERS;
+		msg[1] = 1;
+		if (msg_send(handle->usb_handle, msg, 10)) {
+			return EXIT_FAILURE;
+		}
 		msg[0] = TL866A_SET_LATCH;
+		msg[1] = 0;
 		msg[7] = 1;
 		msg[8] = gnd_pins[i].oe;
 		msg[9] = gnd_pins[i].latch;
@@ -736,10 +743,6 @@ int tl866a_hardware_check(minipro_handle_t *handle)
 			errors++;
 		fprintf(stderr, "GND driver pin %u is %s\n", gnd_pins[i].pin,
 			read_buffer[6 + gnd_pins[i].pin] ? "Bad" : "OK");
-		msg[0] = TL866A_RESET_PIN_DRIVERS;
-		if (msg_send(handle->usb_handle, msg, 10)) {
-			return EXIT_FAILURE;
-		}
 	}
 
 	fprintf(stderr, "\n");
