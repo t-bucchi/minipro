@@ -1470,6 +1470,71 @@ static int t48_check_pins(minipro_handle_t *handle, char *name, uint8_t cmd, zif
 	return EXIT_SUCCESS;
 }
 
+static int t48_check_logic(minipro_handle_t *handle, uint8_t level, int *perr)
+{
+	int i, j;
+	uint8_t msg[64];
+	fprintf(stderr, "Testing 53 Logic level %u pins\n", level);
+	for (i = 0; i < T48_NPINS; i++) {
+		/* Unconnected ICSP pins can't be set to logic 1/0 so ignore them */
+		if (zif_no_io(i))
+			continue;
+		if (level) {
+			if (t48_set_input_and_pulldown(handle))
+				return EXIT_FAILURE;
+		} else {
+			if (t48_set_input_and_pullup(handle))
+				return EXIT_FAILURE;
+		}
+
+		memset(msg, 0, sizeof(msg));
+		msg[0] = T48_SET_OUT;
+		msg[1] = level;
+		msg[4] = i;
+		if (msg_send(handle->usb_handle, msg, 8))
+			return EXIT_FAILURE;
+
+		msg[0] = T48_READ_PINS;
+		if (msg_send(handle->usb_handle, msg, 8))
+			return EXIT_FAILURE;
+		if (msg_recv(handle->usb_handle, msg, sizeof(msg)))
+			return EXIT_FAILURE;
+		if (msg[1]) {
+			msg[0] = T48_RESET_PIN_DRIVERS;
+			if (msg_send(handle->usb_handle, msg, 10)) {
+				return EXIT_FAILURE;
+			}
+			if (minipro_end_transaction(handle)) {
+				return EXIT_FAILURE;
+			}
+			fprintf(stderr,
+				"Overcurrent protection detected while testing logic %u pin driver "
+				"%u!\007\n",
+				level, i + 1);
+			return EXIT_FAILURE;
+		}
+		if (!zif_no_io(i)) {
+			int pin_ok = zif_pin_state(msg, i) == level;
+			fprintf(stderr, "Logic %u pin %u state is %s\n", level, i + 1, pin_ok ? "Good" : "Bad");
+			if (!pin_ok)
+				(*perr)++;
+		}
+		/* Check all other pins do *not* match expected value */
+		for (j = 0; j < T48_NPINS; j++) {
+			if (j == i)
+				continue;
+			/* Skip unconnected ICSP pins */
+			if (zif_no_io(j))
+				continue;
+			if (zif_pin_state(msg, j) == level) {
+				fprintf(stderr, "Unexpected state of pin %u when testing logic %u pin %u: shorted?\n",
+												j + 1, level, i + 1);
+				(*perr)++;
+			}
+		}
+	}
+	return EXIT_SUCCESS;
+}
 
 /* Minipro hardware check */
 int t48_hardware_check(minipro_handle_t *handle)
@@ -1483,6 +1548,12 @@ int t48_hardware_check(minipro_handle_t *handle)
 		return EXIT_FAILURE;
 	fprintf(stderr, "\n");
 	if (t48_check_pins(handle, "GND", T48_SET_GND_PIN, gnd_pins, sizeof(gnd_pins)/sizeof(zif_pins_t), &nerr))
+		return EXIT_FAILURE;
+	fprintf(stderr, "\n");
+	if (t48_check_logic(handle, 0, &nerr))
+		return EXIT_FAILURE;
+	fprintf(stderr, "\n");
+	if (t48_check_logic(handle, 1, &nerr))
 		return EXIT_FAILURE;
 
 	memset(msg, 0, sizeof(msg));
