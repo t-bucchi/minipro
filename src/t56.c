@@ -598,6 +598,12 @@ static uint8_t *do_ic_test(minipro_handle_t *handle, int pull)
 			return NULL;
 		}
 
+		if (msg[1]) {
+			fprintf(stderr, "Overcurrent protection!\007\n");
+			free(result);
+			return NULL;
+		}
+
 		/* Unpack the result from 2 pin/byte to 1 pin/byte */
 		for (i = 0; i < handle->device->package_details.pin_count; i++)
 			*out++ = (msg[8 + i / 2] >> (4 * (i & 1))) & 0xf;
