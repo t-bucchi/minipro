@@ -306,7 +306,7 @@ static int get_csv(const char *tag, size_t taglen, char *elem_name,
 		if (token)
 			*token = '\0';
 		errno = 0;
-		uint32_t value = strtoul(list, &endptr, 10);
+		uint32_t value = strtoul(list, &endptr, 0);
 		if (errno || value > UINT16_MAX) {
 			return EXIT_FAILURE;
 		}
