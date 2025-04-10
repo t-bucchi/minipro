@@ -1675,10 +1675,11 @@ int get_algorithm(device_t *device, const char *algo_path, uint8_t icsp,
 			strcat(name, icsp ? "2S" : algo_str);
 			break;
 
-		/* Choose 1.8V/3.3V for EMMC */
+		/* Choose algorithm variant and 1.8V/3.3V for EMMC */
 		case IC2_ALG_EMMC:
-				strcat(name, V_1V8 ? "_18" : "_33");
-			break;
+			sprintf(name, "%02x", (device->variant>>8));
+			strcat(name, V_1V8 ? "_18" : "_33");
+		break;
 
 			/* Default case. Handle reversed package devices */
 		default:
