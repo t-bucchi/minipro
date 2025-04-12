@@ -1,5 +1,5 @@
 # minipro
-## Latest "stable" version 0.7.2
+## Latest "stable" version 0.7.3
 
 An open source program for controlling XGecu's series of chip programmers.
 
