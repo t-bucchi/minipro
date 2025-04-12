@@ -212,9 +212,11 @@ void print_version_and_exit(cmdopts_t *cmdopts)
 	char output[] =
 		"Commit date:\t%s\n"
 		"Git commit:\t%s\n"
-		"Git branch:\t%s\n";
+		"Git branch:\t%s\n"
+		"Share dir:\t%s\n";
+
 	fprintf(stderr, signon, VERSION);
-	fprintf(stderr, output, GIT_DATE, GIT_HASH, GIT_BRANCH);
+	fprintf(stderr, output, GIT_DATE, GIT_HASH, GIT_BRANCH, SHARE_INSTDIR);
 	db_data_t db_data;
 	memset(&db_data, 0, sizeof(db_data));
 	db_data.logicic_path = cmdopts->logicic_path;

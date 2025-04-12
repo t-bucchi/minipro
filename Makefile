@@ -117,6 +117,7 @@ $(VERSION_HEADER):
 	@echo "#define GIT_BRANCH \"$(GIT_BRANCH)\"" >> $@
 	@echo "#define GIT_HASH \"$(GIT_HASH)\"" >> $@
 	@echo "#define GIT_DATE \"$(GIT_DATE)\"" >> $@
+	@echo "#define SHARE_INSTDIR \"$(SHARE_INSTDIR)\"" >>$@
 
 $(VERSION_STRINGS):
 	@echo "Creating $@"
