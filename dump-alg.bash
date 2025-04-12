@@ -50,7 +50,7 @@ usage() {
 	echo
 	echo "If a path is supplied (for example: /usr/local/share/minipro/), this script"
 	echo "will attempt to install $ALG_FILENAME there.  This is intended for use by the"
-	echo "minipro Makefile and package management."
+	echo "minipro Makefile, package management, or manually."
 	echo
 	echo "Prerequisite programs: bash, bsdtar, sha256sum, base64, and wget or curl."
 	echo "If you don't see \"bsdtar\" as a separate package, try \"libarchive-tools\"."
@@ -67,29 +67,55 @@ if [ $1 ] ; then
 fi
 
 echo "Starting the Xgecu downloader."
-echo "** Where to put the T56 algorithms ($ALG_FILENAME)?"
+echo "** Where do I put the T56 algorithms ($ALG_FILENAME) file?"
 
 if [ $1 ]; then
-	if ! [ -w $WORKDIR ]; then
-		echo "** Error: Unable to write to $WORKDIR.  Fix that and try again."
+	INSTALL_DIR=$1
+	echo "** I see you want me to install it to $INSTALL_DIR"
+	echo "** Checking to see if I can work on this stuff right here."
+
+	if [ -w $WORKDIR ]; then
+		echo "   Success!"
+	else
+		echo "** Error: Unable to write to $WORKDIR."
+		echo "   Where do I put the downloaded file?"
 		exit
 	fi
 
-	INSTALL_DIR=$1
 	# Do we have write access now?
 	# No?  Then see if we can do it through sudo.
 	if ! [ -w $INSTALL_DIR ]; then
-		if ! [ -x "$(command -v sudo)" ]; then
-			echo "** Warning: sudo not found.  Install algorithms manually."
-		elif [ !  $(command sudo test -w $INSTALL_DIR) ] ; then
-			echo "** Error: Unable to write to $INSTALL_DIR.  Install minipro first."
+		if [ ! -d $INSTALL_DIR ] ; then
+			echo "** Error: $INSTALL_DIR doesn't exist.  Is minipro installed yet?"
 			exit
-		fi  # We can write with sudo
+		fi
+
+		echo "** Checking to see if I can write there as \"$USER\"."
+		if [ ! -w $INSTALL_DIR ] ; then
+			echo "** Can't write there as \"$USER\".  Trying as the superuser."
+			if ! [ -x "$(command -v sudo)" ]; then
+				echo "** Error: sudo not found.  Install algorithms manually."
+				exit
+			fi
+
+			sudo -u root bash -c : && RUNAS="sudo -u root"
+				$RUNAS bash<<-EOF
+				if [ -w $INSTALL_DIR ] ; then
+					USE_ROOT=1
+					echo "   Success!"
+				else
+					echo "** Error: Unable to write to $INSTALL_DIR."
+					exit
+				fi
+			EOF
+		fi
 	fi  # We can write without needing root access
 else
+	# No target directory specified, so we'll just put the files into the
+	# current working directory.
 	INSTALL_DIR=$WORKDIR
+	echo "** I'll just leave it right here."
 fi
-echo "    $INSTALL_DIR"
 
 
 # Check for needed programs: bsdtar, sha256sum, wget or curl, and base64.
@@ -140,10 +166,10 @@ if [ ${ERROR} ] ; then
 fi
 
 
-# Download, check, then extract...
+# Download, check, then extract.
 if [ ! -f "$WORKDIR/$XGPRO_RAR" ] ; then
-	echo "** Downloading $XGPRO_RAR..."
-	echo "   doing $GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR"
+	echo "** Downloading $XGPRO_RAR."
+#	echo "   doing $GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR"
 	http_code="$($GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR)"
 	RETVAL="$?"
 
@@ -160,7 +186,7 @@ if [ $RETVAL -ne 0 ] ; then
 	exit 2
 fi
 
-echo "** Checking $XGPRO_RAR..."
+echo "** Checking $XGPRO_RAR."
 SHA256_CHECK=`sha256sum $XGPRO_RAR | cut -d" " -f1`
 if [ $XGPRO_SHA256 != $SHA256_CHECK ] ; then
 	echo "** Error: SHA256 checksum for $XGPRO_RAR is wrong."
@@ -170,7 +196,7 @@ if [ $XGPRO_SHA256 != $SHA256_CHECK ] ; then
 fi
 echo "** SHA256 checksum is good."
 
-echo "** Extracting..."
+echo "** Extracting."
 $TAR -x --to-stdout -f $WORKDIR/$XGPRO_RAR \
 	| $TAR -x -f -  ${FIRMWARE_NAMES[*]} $XGPRO_ALG/*.alg
 
@@ -188,7 +214,7 @@ echo "    $XGPRO_ALG/"
 
 # Extracting algorithm data and building algorithm.xml.
 #
-echo "** Processing T56 algorithm files to create $ALG_FILENAME..."
+echo "** Processing T56 algorithm files to create $ALG_FILENAME."
 echo '<root>' > $ALG_FILENAME
 echo '<database type="ALGORITHMS">' >> $ALG_FILENAME
 echo '<algorithms_T56>' >> $ALG_FILENAME
@@ -215,8 +241,12 @@ echo '</root>' >> $ALG_FILENAME
 
 rm -rf $XGPRO_ALG/
 
-if [ $INSTALL_DIR != $WORKDIR ] ; then
-	echo "** Installing $ALG_FILENAME to $INSTALL_DIR..."
-fi
 echo
+
+if [ $INSTALL_DIR != $WORKDIR ] ; then
+	echo "** Installing $ALG_FILENAME to $INSTALL_DIR."
+	if [ -n $USE_ROOT ] ; then
+		sudo cp $ALG_FILENAME $INSTALL_DIR
+	fi
+fi
 echo "** Done!"
