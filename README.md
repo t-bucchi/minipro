@@ -134,9 +134,6 @@ the rpmdevtools package installed and a `rpmbuild` directory tree within
 your homedir. Use the `rpmdev-setuptree` command to create the rpmbuild
 directory tree if it does not exist yet.
 
-Since minipro does not yet make official releases with version numbers
-and tags, it will build the master branch by default.
-
 Then use these commands to download the source tarballs from Gitlab and
 build the package for Fedora and CentOS:
 
@@ -185,6 +182,21 @@ cd minipro
 make
 sudo make install
 ```
+
+### Download and install bitstream algorithms for the T56
+
+Unlike the other programmers from Xgecu, the T56 does not store its FPGA
+bitstreams in the hardware.  Instead it must be loaded by the
+controlling software.  Those bitstreams (Xgecu calls them algorithms)
+are found in the official Xgecu software releases.  They cannot be
+included here for copyright reasons.  Instead the build process can
+download them for you and convert them into a single file for use by
+`minipro`.
+```nohighlight
+make algorithm
+sudo make install-algorithm
+```
+
 
 ### Checksum notes
 
