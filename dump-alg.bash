@@ -52,9 +52,9 @@ usage() {
 	echo "will attempt to install $ALG_FILENAME there.  This is intended for use by the"
 	echo "minipro Makefile and package management."
 	echo
-	echo "Prerequisite programs: bash, bsdtar, base64, and wget or curl.  If you don't"
-	echo "see \"bsdtar\" as a separate package, try \"libarchive-tools\".  As the name"
-	echo "suggests, on *BSD systems, your regular tar program is bsdtar."
+	echo "Prerequisite programs: bash, bsdtar, sha256sum, base64, and wget or curl."
+	echo "If you don't see \"bsdtar\" as a separate package, try \"libarchive-tools\"."
+	echo "As the name suggests, on BSD systems, your regular tar program is bsdtar."
 	echo
 	exit 0;
 }
@@ -152,6 +152,7 @@ if [ ! -f "$WORKDIR/$XGPRO_RAR" ] ; then
 	fi
 else
 	echo "** $XGPRO_RAR already in $WORKDIR."
+	RETVAL=0
 fi
 
 if [ $RETVAL -ne 0 ] ; then
