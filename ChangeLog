@@ -24,6 +24,8 @@ BUG FIXES
 
 - Fixed AVR fuse parsing.
 
+- Fixed bad invocation of curl.
+
 
 NOTES
 
