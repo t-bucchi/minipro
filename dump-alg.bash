@@ -19,12 +19,12 @@
 # for a discussion of this practice and why it's bad.
 
 # Prerequisites:
-#   bash, bsdtar, md5sum, wget or curl, and base64.
+#   bash, bsdtar, sha256sum, wget or curl, and base64.
 
-XGPRO_RAR=xgproV1267_setup.rar
-XGPRO_RAR2=XgproV1267_Setup.exe
-XGPRO_URL=https://github.com/Kreeblah/XGecu_Software/raw/refs/heads/master/Xgpro/12/
-XGPRO_MD5=3f3411db1db471b337e90683995182b1
+XGPRO_RAR=xgproV1278_Setup.rar
+XGPRO_RAR2=XgproV1278_Setup.exe
+XGPRO_URL=https://github.com/Kreeblah/XGecu_Software/raw/refs/heads/master/Xgpro/12
+XGPRO_SHA256=cf5dd2771aa3b5af46e09c2eabc05bdb56362dd2719c348e287fa91d93b8eec9
 
 WORKDIR=`pwd`
 XGPRO_ALG="algorithm"
@@ -32,7 +32,7 @@ ALG_FILENAME="algorithm.xml"
 
 FIRMWARE_NAMES=("updateII.dat" "UpdateT48.dat" "updateT56.dat")
 FIRMWARE_TYPE=("TL866II+" "T48" "T56")
-FIRMWARE_VERSIONS=("04.2.105" "01.1.31" "01.1.72")
+FIRMWARE_VERSIONS=("04.2.105" "01.1.32" "01.1.73")
 FIRMWARE_COUNT=3
 
 ALG_OFFSET=545		# 0x221
@@ -92,7 +92,7 @@ fi
 echo "    $INSTALL_DIR"
 
 
-# Check for needed programs: bsdtar, md5sum, wget or curl, and base64.
+# Check for needed programs: bsdtar, sha256sum, wget or curl, and base64.
 #
 if ! [ -x "$(command -v $TAR)" ]; then
         # Bsdtar not found.  Check if tar is really bsdtar
@@ -113,18 +113,18 @@ if [ -x "$(command -v wget )" ]; then
 	GETURL="wget -O"
 	echo "** Found wget."
 elif [ -x "$(command -v curl)" ]; then
-	GETURL="curl -o"
+	GETURL="curl -L --fail -w '%{http_code}' -o"
 	echo "** Found curl."
 else
 	echo "Error: Neither wget nor curl are installed." >&2
 	ERROR=1
 fi
 
-if ! [ -x "$(command -v md5sum)" ]; then
-	echo "Error: md5sum is not installed.  This should not happen." >&2
+if ! [ -x "$(command -v sha256sum)" ]; then
+	echo "Error: sha256sum is not installed.  This should not happen." >&2
 	ERROR=1
 else
-	echo "** Found md5sum."
+	echo "** Found sha256sum."
 fi
 
 if ! [ -x "$(command -v base64)" ]; then
@@ -143,19 +143,31 @@ fi
 # Download, check, then extract...
 if [ ! -f "$WORKDIR/$XGPRO_RAR" ] ; then
 	echo "** Downloading $XGPRO_RAR..."
-	$GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR
+	echo "   doing $GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR"
+	http_code="$($GETURL $WORKDIR/$XGPRO_RAR $XGPRO_URL/$XGPRO_RAR)"
+	RETVAL="$?"
+
+	if [ ! -s $WORKDIR/$XGPRO_RAR ] ; then
+		rm -f $WORKDIR/$XGPRO_RAR
+	fi
 else
 	echo "** $XGPRO_RAR already in $WORKDIR."
 fi
 
-echo "** Checking $XGPRO_RAR..."
-MD5_CHECK=`md5sum $XGPRO_RAR | cut -d" " -f1`
-if [ $XGPRO_MD5 != $MD5_CHECK ] ; then
-	echo "** Error: MD5 checksum for $XGPRO_RAR is wrong."
-	echo "** $XGPRO_MD5 != $MD5_CHECK"
+if [ $RETVAL -ne 0 ] ; then
+	echo "** Error: Unable to download $XGPRO_RAR."
 	exit 2
 fi
-echo "** MD5 checksum is good."
+
+echo "** Checking $XGPRO_RAR..."
+SHA256_CHECK=`sha256sum $XGPRO_RAR | cut -d" " -f1`
+if [ $XGPRO_SHA256 != $SHA256_CHECK ] ; then
+	echo "** Error: SHA256 checksum for $XGPRO_RAR is wrong."
+	echo "    Should be $XGPRO_SHA256"
+	echo "    But I got $SHA256_CHECK"
+	exit 3
+fi
+echo "** SHA256 checksum is good."
 
 echo "** Extracting..."
 $TAR -x --to-stdout -f $WORKDIR/$XGPRO_RAR \
