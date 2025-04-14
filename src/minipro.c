@@ -535,11 +535,11 @@ void minipro_print_system_info(minipro_handle_t *handle)
 		handle->firmware_str, handle->firmware);
 
 	if (handle->version == MP_T48) {
-		fprintf(stderr, "Warning: T48 support is experimental!\n");
+		fprintf(stderr, "Warning: T48 support is not yet complete!\n");
 	}
 
 	if (handle->version == MP_T56) {
-		fprintf(stderr, "Warning: T56 support is extremely experimental!\n");
+		fprintf(stderr, "Warning: T56 support is experimental!\n");
 	}
 
 	if (handle->firmware < expected_firmware) {

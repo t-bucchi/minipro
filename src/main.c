@@ -276,8 +276,8 @@ void print_supported_programmers_and_exit()
 {
 	fprintf(stderr, "tl866a:  TL866CS/A\n"
 			"tl866ii: TL866II+\n"
-			"t48:     T48  (experimental)\n"
-			"t56:     T56  (very experimental)\n"
+			"t48:     T48  (mostly complete)\n"
+			"t56:     T56  (experimental)\n"
 			);
 	exit(EXIT_SUCCESS);
 }
