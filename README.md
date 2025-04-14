@@ -11,9 +11,8 @@ interface that allows for a GUI front-end if desired.
 
 ## Features
 * Native support for Linux, BSD, and other flavors of Unix.
-* Compatibility with TL866CS, TL866A, and TL866II+ from XGecu
+* Compatibility with TL866CS, TL866A, TL866II+, T48, and T56 from XGecu
   (http://www.xgecu.com/en/)
-* Experimental support for Xgecu's T48 and T56 programmers
 * More than 13000 target devices (including AVRs, PICs, various BIOSes
   and EEPROMs)
 * ZIF40 socket and ISP support
