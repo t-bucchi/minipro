@@ -67,7 +67,7 @@ MINIPRO=minipro
 INFOIC=infoic.xml
 LOGICIC=logicic.xml
 ALGORITHM=algorithm.xml
-DUMP_ALG=dump-alg.bash
+DUMP_ALG=dump-alg-minipro.bash
 
 TESTS=$(wildcard tests/test_*.c);
 OBJCOPY?=objcopy

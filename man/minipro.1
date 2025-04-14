@@ -309,16 +309,32 @@ The T56 is different in that it requires its algorithms to be loaded
 from the controlling program.  Those algorithms are installed by the
 official Xgecu software to the host computer.  Because of the copyright
 on that package, the algorithms cannot be included in the minipro
-distribution.
+distribution.  Fortunately a script for doing that is provided.
 
 To allow
 .I minipro
-to get needed algorithms into a T58 programmer, a script,
-"dump-alg.bash", is provided to download a copy of the official Xgecu
-software, extract the algorithms, and pack those data into
-"algorithm.xml".  This file is intended to be installed to
-.I minipro's
-share directory.
+to get needed algorithms into a T58 programmer,
+.I dump-alg-minipro.bash
+is provided to download a copy of the official Xgecu software, extract
+the algorithms, and pack those data into "algorithm.xml".  If the
+algorithms were not installed right after
+.I minipro
+was installed, this script can be used directly.  It should have been
+installed when
+.I minipro
+was installed by whatever means.  First invoke
+.I minipro
+with the
+.B \-V
+or
+.B \--version
+option and see what directory is listed for "Share dir".  Suppose it's
+"/usr/local/share/minipro".  Invoke the script like this:
+
+.B dump-alg-minipro.bash /usr/local/share/minipro
+
+The script will then do its thing and install "algorithm.xml" to its
+proper place.
 
 .SH UPDATING FIRMWARE
 Firmware update files can be obtained from the manufacturer's website:
@@ -362,7 +378,7 @@ Custom chips can be added in the
 .B infoic.xml
 file, but it must be noted that the since content is generated from the
 .B infoic.dll
-, the custom chips should be added in a proper section of the xml file.
+file , the custom chips should be added in a proper section of the xml file.
 
 Add any new chip as an
 .B <ic>
