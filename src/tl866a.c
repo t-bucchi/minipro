@@ -77,6 +77,8 @@
 #define TL866A_BOOTLOADER_SIZE	   0x1800
 #define TL866A_FIRMWARE_BLOCK_SIZE 0x50
 
+#define TL866A_NPINS		   40
+
 typedef struct zif_pins_s {
 	uint8_t pin;
 	uint8_t latch;
@@ -594,7 +596,7 @@ int tl866a_hardware_check(minipro_handle_t *handle)
 	uint8_t msg[64];
 	memset(msg, 0, sizeof(msg));
 
-	uint8_t i, errors = 0;
+	uint8_t i, j, errors = 0;
 	/* Reset pin drivers state */
 	msg[0] = TL866A_RESET_PIN_DRIVERS;
 	if (msg_send(handle->usb_handle, msg, 10)) {
@@ -743,6 +745,68 @@ int tl866a_hardware_check(minipro_handle_t *handle)
 			errors++;
 		fprintf(stderr, "GND driver pin %u is %s\n", gnd_pins[i].pin,
 			read_buffer[6 + gnd_pins[i].pin] ? "Bad" : "OK");
+	}
+
+	fprintf(stderr, "\n");
+	/* Testing logic state */
+
+	/* Reset and set pullups */
+	memset(msg, 0, sizeof(msg));
+	msg[0] = TL866A_RESET_PIN_DRIVERS;
+	msg[1] = 1;
+	if (msg_send(handle->usb_handle, msg, 10)) {
+		return EXIT_FAILURE;
+	}
+
+	for (i = 0; i < TL866A_NPINS; i++) {
+		uint8_t pin_offset = 7 + zif_table[i];
+		msg[0] = TL866A_SET_DIR;
+		/* Set all pins as input except pin under test */
+		memset(msg + 7, 1, TL866A_NPINS);
+		msg[pin_offset] = 0;
+		if (msg_send(handle->usb_handle, msg, 47)) {
+			return EXIT_FAILURE;
+		}
+		memset(msg, 0, sizeof(msg));
+		msg[0] = TL866A_SET_OUT;
+		if (msg_send(handle->usb_handle, msg, 47)) {
+			return EXIT_FAILURE;
+		}
+		msg[0] = TL866A_READ_ZIF_PINS;
+		if (msg_send(handle->usb_handle, msg, 18)) {
+			return EXIT_FAILURE;
+		}
+		if (msg_recv(handle->usb_handle, read_buffer,
+			     sizeof(read_buffer))) {
+			return EXIT_FAILURE;
+		}
+		if (read_buffer[1]) {
+			msg[0] = TL866A_RESET_PIN_DRIVERS;
+			if (msg_send(handle->usb_handle, msg, 10)) {
+				minipro_close(handle);
+				return EXIT_FAILURE;
+			}
+			if (minipro_end_transaction(handle)) {
+				return EXIT_FAILURE;
+			}
+			fprintf(stderr,
+				"Overcurrent protection detected while testing Logic level driver "
+				"%u!\007\n", i + 1);
+			return EXIT_FAILURE;
+		}
+		if (read_buffer[7 + i])
+			errors++;
+		fprintf(stderr, "Logic 0 pin %u is %s\n", i + 1,
+			read_buffer[7 + i] ? "Bad" : "OK");
+		for (j = 0; j < TL866A_NPINS; j++) {
+			if (i == j)
+				continue;
+			if (!read_buffer[7 + j]) {
+				fprintf(stderr, "Unexpected state of pin %u when testing logic pin %u: shorted?\n",
+					j + 1, i + 1);
+			errors++;
+			}
+		}
 	}
 
 	fprintf(stderr, "\n");
