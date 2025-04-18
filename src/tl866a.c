@@ -710,7 +710,7 @@ int tl866a_hardware_check(minipro_handle_t *handle)
 		}
 		msg[0] = TL866A_SET_LATCH;
 		msg[1] = 0;
-		msg[7] = 1;
+		msg[7] = gnd_pins[i].latch == 9 ? 9 : 1;
 		msg[8] = gnd_pins[i].oe;
 		msg[9] = gnd_pins[i].latch;
 		msg[10] = gnd_pins[i].mask;
