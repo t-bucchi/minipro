@@ -173,6 +173,15 @@ static mask_prom_t mask_prom_table[] = {
 		  (uint8_t[]){ 10, 9, 8, 7, 6, 5, 4, 3, 25, 24, 21, 20, 23, 2, 0 },
 	  .ce_pins = (uint8_t[]){ 22, 0 },
 	  .cs_pins = (uint8_t[]){ 27, 26, 0 },
+	  .compare_mask = 0xff },
+	/* Type 0x81; 2048x8; DIP24 w/ programmable CE (2316) */
+	{ .gnd_pins = (uint8_t[]){ 12, 0 },
+	  .vcc_pins = (uint8_t[]){ 24, 0 },
+	  .data_bus_pins = (uint8_t[]){ 9, 10, 11, 13, 14, 15, 16, 17, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 19, 0 },
+	  .ce_pins = (uint8_t[]){ 0 },
+	  .cs_pins = (uint8_t[]){ 20, 18, 21, 0 },
 	  .compare_mask = 0xff }
 };
 
