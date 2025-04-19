@@ -34,7 +34,7 @@ $ minipro -p ATMEGA48 -r atmega48.bin
 
 You'll need some sort of Linux or MacOS machine.  Other Unices may work,
 though that is untested.  You will need version 1.0.16 or greater of
-libusb.  Earlier verions may work, but are untested.
+libusb.  Earlier versions may work, but are untested.
 
 
 ## Installation on Linux
