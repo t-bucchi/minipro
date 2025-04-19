@@ -1026,6 +1026,7 @@ int t48_firmware_update(minipro_handle_t *handle, const char *firmware)
 
 static pin_driver_t last_pinstate[T48_NPINS];
 static uint8_t last_direction[T48_NPINS];
+static uint8_t last_output[T48_NPINS];
 static int last_vcc=0;
 static int last_j1vcc=1;
 
@@ -1250,6 +1251,13 @@ int t48_set_vccio_voltagef(minipro_handle_t *handle,float vccio,float tolerance)
 int t48_reset_state(minipro_handle_t *handle)
 {
 	uint8_t msg[48];
+	memset(last_direction, 0, sizeof(last_direction));
+	/* Set last_output to invalid value so we always change it if not set before */
+	memset(last_output, 0xff, sizeof(last_direction));
+	/* Also clear VCC/GND/VPP values */
+	memset(last_pinstate, 0, sizeof(last_pinstate));
+	last_vcc = 0;
+	last_j1vcc = 1;
 	memset(msg, 0, sizeof(msg));
 	/* Reset pin drivers state */
 	msg[0] = T48_RESET_PIN_DRIVERS;
@@ -1262,6 +1270,9 @@ int t48_set_input_and_pullup(minipro_handle_t *handle)
   /* Sets all pins to input and with pull down active
    */
 	uint8_t msg[48];
+	memset(last_direction, 0, sizeof(last_direction));
+	/* Set last_output to invalid value so we always change it if not set before */
+	memset(last_output, 0xff, sizeof(last_direction));
 	memset(msg, 0, sizeof(msg));
 	/* Reset pin drivers state */
 	msg[0] = T48_SET_PULLUPS;
@@ -1273,6 +1284,8 @@ int t48_set_input_and_pulldown(minipro_handle_t *handle)
   /* Sets all pins to input and with pull up active
    */
 	uint8_t msg[48];
+	memset(last_direction, 0, sizeof(last_direction));
+	/* Set last_output to invalid value so we always change it if not set before */
 	memset(msg, 0, sizeof(msg));
 	/* Reset pin drivers state */
 	msg[0] = T48_SET_PULLDOWNS;
@@ -1316,12 +1329,13 @@ int t48_set_zif_state(minipro_handle_t *handle, uint8_t *zif)
 	uint8_t msg[8];
 	memset(msg, 0, sizeof(msg));
 	for (int i = 0; i < T48_NPINS; i++) {
-          if(last_direction[i]==MP_PIN_DIRECTION_OUT) {
+          if(last_direction[i]==MP_PIN_DIRECTION_OUT && last_output[i] != zif[i]) {
             msg[0] = T48_SET_OUT;
             msg[1] = zif[i];
             msg[4] = i;
             if (msg_send(handle->usb_handle, msg, 8))
               return EXIT_FAILURE;
+	    last_output[i] = zif[i];
           }
 	}
 
