@@ -1384,11 +1384,28 @@ int t48_screen_voltages(minipro_handle_t *handle) {
 	return EXIT_SUCCESS;
 }
 
+
+/*
+  VPP[0..15]
+  9.0,  9.5, 10.0, 11.0, 11.5, 12.0, 12.5, 13.0,
+  13.5, 14.0, 14.5, 15.5, 16.0, 16.5, 17.0, 18.0
+
+  VCC[0..15]
+  1.9, 2.7, 3.0, 3.3, 3.6, 3.9, 4.1, 4.5,
+  4.8, 5.0, 5.3, 5.5, 6.0, 6.3, 6.5, 7.0
+ */
+
 int t48_set_voltages(minipro_handle_t *handle, uint8_t vcc, uint8_t vpp)
 {
-	int err=t48_set_vcc_voltage(handle,vcc);
+	/* Internal VCC table firmware map */
+	static const uint8_t vcc_t[] = { 3, 13, 16, 19, 23, 27, 29, 34,
+					 38, 40, 44, 47, 52, 56, 59, 62};
+	int err=t48_set_vcc_voltage(handle,vcc_t[vcc]);
 	if(err) return err;
-	return t48_set_vpp_voltage(handle,vpp);
+	/* Internal VPP table firmware map */
+	static const uint8_t vpp_t[] = {0, 1, 3, 6, 9, 10, 13, 14, 17, 18,
+					20, 24, 26, 28, 30, 35};
+	return t48_set_vpp_voltage(handle,vpp_t[vpp]);
 }
 
 int t48_set_pin_drivers(minipro_handle_t *handle, pin_driver_t *pins)
