@@ -10,7 +10,7 @@ interface that allows for a GUI front-end if desired.
 
 
 ## Features
-* Native support for Linux, BSD, and other flavors of Unix.
+* Native support for Linux, BSD, macOS, and other flavors of Unix.
 * Compatibility with TL866CS, TL866A, TL866II+, T48, and T56 from XGecu
   (http://www.xgecu.com/en/)
 * More than 13000 target devices (including AVRs, PICs, various BIOSes
