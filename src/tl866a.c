@@ -1247,8 +1247,8 @@ static zif_pins_t *get_pwr_pin(int pin, zif_pins_t *table, int count)
 static int pwr_init(minipro_handle_t *handle, uint8_t *vector, size_t pin_count)
 {
 	assert(vector != NULL);
-	static uint8_t pwr[] = { TL866A_POWER_ON,
-				 0x00,
+	static uint8_t pwr[] = { TL866A_RESET_PIN_DRIVERS,
+				 0x01,
 				 0x00,
 				 0x00,
 				 0x00,
@@ -1269,20 +1269,12 @@ static int pwr_init(minipro_handle_t *handle, uint8_t *vector, size_t pin_count)
 				 0x07,
 				 0x00 };
 
-	/* This is a trick to switch on all pull-up resistors
-	 * First switch on VCC
-	 * The VCC will be applied to pin 40
-	 * Also this will enable all pull-up resistors
-	 */
-	if (msg_send(handle->usb_handle, pwr, 4)) {
+	/* Switch on all pullup resistors */
+	if (msg_send(handle->usb_handle, pwr, 10)) {
 		return EXIT_FAILURE;
 	}
 
-	/* Now disable all pin drivers */
 	pwr[0] = TL866A_SET_LATCH;
-	if (msg_send(handle->usb_handle, pwr, sizeof(pwr))) {
-		return EXIT_FAILURE;
-	}
 
 	/* Scan the test vector for V and G */
 	zif_pins_t *pwr_pin;
@@ -1428,8 +1420,7 @@ int tl866a_logic_ic_test(minipro_handle_t *handle)
 	int ret = EXIT_FAILURE;
 
 	/* Check for invalid pin count */
-	if (handle->device->package_details.pin_count > 32 ||
-	    handle->device->package_details.pin_count % 2) {
+	if (handle->device->package_details.pin_count % 2) {
 		fprintf(stderr, "Invalid pin count!\n");
 		return ret;
 	}
@@ -1441,7 +1432,6 @@ int tl866a_logic_ic_test(minipro_handle_t *handle)
 	if (!(result = do_ic_test(handle))) {
 		fprintf(stderr, "Error running logic test.\n");
 	} else if (handle->cmdopts->logicic_out) {
-		/* WARNING: untested */
 		ret = write_logic_file(handle, result, result);
 	} else {
 		int errors = 0, err;
