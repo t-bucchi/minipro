@@ -1187,6 +1187,8 @@ static int device_callback(int type, const char *tag, size_t taglen,
 				if (sm->found && !strlen(sm->device->name)) {
 					char *end = memchr(mb_name.b, ',',
 							   mb_name.z);
+					/* If only one chip name, use it */
+					if (!end) end = (char*)mb_name.b + mb_name.z;
 					strncpy(sm->device->name, mb_name.b,
 						end - mb_name.b);
 					sm->found_count++;
