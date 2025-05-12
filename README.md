@@ -43,7 +43,7 @@ libusb.  Earlier versions may work, but are untested.
 
 #### Debian/Ubuntu
 ```nohighlight
-sudo apt-get install build-essential pkg-config git libusb-1.0-0-dev
+sudo apt-get install build-essential pkg-config git libusb-1.0-0-dev zlib1g-dev
 
 ```
 
