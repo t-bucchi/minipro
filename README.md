@@ -149,6 +149,23 @@ rpmbuild -ba rpm/minipro-opensuse.spec
 
 The final RPMs can be found below `~/rpmbuild/RPMS/`
 
+## Installation on Guix
+
+```nohighlight
+guix install minipro
+```
+
+### Udev configuration (Guix System)
+
+If you want to access the programmer without root privileges you must install the necessary udev rules. This can be done by extending `udev-service-type` in your `operating-system` configuration with this package.
+
+
+```nohighlight
+(udev-rules-service 'minipro minipro #:groups '("plugdev")
+```
+
+Additionally your user must be member of the `plugdev` group. At that point, minipro should be installed and ready to use.
+
 ## Installation on macOS
 
 The easiest way to install on macOS is by using [homebrew](https://brew.sh/) to install the most recent release:
