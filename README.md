@@ -1,3 +1,7 @@
+**CAUTION:** This repository is a personal working repository. This is not official.
+
+The original is https://gitlab.com/DavidGriffith/minipro .
+
 # minipro
 ## Latest "stable" version 0.7.3
 
