@@ -163,7 +163,34 @@ static prom_t prom_table[] = {
 	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
 	  .compare_mask = 0xff },
 
-	/* Type 13; 131072x8; DIP28 (1MbitROM) */
+	/* Type 13; 16384x8; DIP28 (M5M23128 128kbitROM) */
+	{ .gnd_pins = (uint8_t[]){ 14, 0 },
+	  .vcc_pins = (uint8_t[]){ 28, 0 },
+	  .data_bus_pins = (uint8_t[]){ 11, 12, 13, 15, 16, 17, 18, 19, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 10, 9, 8, 7, 6, 5, 4, 3, 25, 24, 21, 23,	2, 26, 0 },
+	  .ce_lo_pins = (uint8_t[]){ 20, 22, 0 },
+	  .compare_mask = 0xff },
+
+	/* Type 14; 32768x8; DIP28 (MB83256 256kbitROM) */
+	{ .gnd_pins = (uint8_t[]){ 14, 0 },
+	  .vcc_pins = (uint8_t[]){ 28, 0 },
+	  .data_bus_pins = (uint8_t[]){ 11, 12, 13, 15, 16, 17, 18, 19, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 10, 9, 8, 7, 6, 5, 4, 3, 25, 24, 21, 23, 2, 26, 27, 0 },
+	  .ce_lo_pins = (uint8_t[]){ 20, 22, 0 },
+	  .compare_mask = 0xff },
+
+	/* Type 15; 65536x8; DIP28 (MB83512 512kbitROM) */
+	{ .gnd_pins = (uint8_t[]){ 14, 0 },
+	  .vcc_pins = (uint8_t[]){ 28, 0 },
+	  .data_bus_pins = (uint8_t[]){ 11, 12, 13, 15, 16, 17, 18, 19, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 10, 9, 8, 7, 6, 5, 4, 3, 25, 24, 21, 23, 2, 26, 27, 1, 0 },
+	  .ce_lo_pins = (uint8_t[]){ 20, 22, 0 },
+	  .compare_mask = 0xff },
+
+	/* Type 16; 131072x8; DIP28 (MB831000 1MbitROM) */
 	{ .gnd_pins = (uint8_t[]){ 14, 0 },
 	  .vcc_pins = (uint8_t[]){ 28, 0 },
 	  .data_bus_pins = (uint8_t[]){ 11, 12, 13, 15, 16, 17, 18, 19, 0 },
