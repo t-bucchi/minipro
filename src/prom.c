@@ -162,6 +162,15 @@ static prom_t prom_table[] = {
 		  (uint8_t[]){ 8, 7, 6, 5, 4, 3, 2, 1, 23, 22, 19, 18, 21, 0 },
 	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
 	  .compare_mask = 0xff },
+
+	/* Type 13; 131072x8; DIP28 (1MbitROM) */
+	{ .gnd_pins = (uint8_t[]){ 14, 0 },
+	  .vcc_pins = (uint8_t[]){ 28, 0 },
+	  .data_bus_pins = (uint8_t[]){ 11, 12, 13, 15, 16, 17, 18, 19, 0 },
+	  .addr_bus_pins =
+		  (uint8_t[]){ 10, 9, 8, 7, 6, 5, 4, 3, 25, 24, 21, 23, 2, 26, 27, 1, 22, 0 },
+	  .ce_lo_pins = (uint8_t[]){ 20, 0 },
+	  .compare_mask = 0xff },
 };
 
 static mask_prom_t mask_prom_table[] = {
